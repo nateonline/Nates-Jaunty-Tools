@@ -15,12 +15,12 @@ namespace NatesJauntyTools.EditorDetails
 
 		public void ApplyData()
 		{
-			version_niceNumber = "0.0.2";
-			version_trueNumber = "00.00.02";
+			version_niceNumber = "0.0.1";
+			version_trueNumber = "00.00.01";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Modified, "Added the correct namespace to some files")
+				new ChangeLogItem(ChangeType.Modified, "Created Nate's Jaunty Tools")
 			};
 		}
 	}
