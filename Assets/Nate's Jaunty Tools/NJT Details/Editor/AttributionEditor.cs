@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace NatesJauntyTools.EditorDetails
+namespace NatesJauntyTools.Details
 {
 	[CustomEditor(typeof(AttributionAsset))]
 	public class AttributionEditor : Editor

@@ -52,8 +52,6 @@ namespace NatesJauntyTools
 			return new Vector2(x, y);
 		}
 
-
-
 		public static Vector3 RotateAroundPivot(this ref Vector3 point, Vector3 pivot, Vector3 angles)
 		{
 			Vector3 dir = point - pivot; // get point direction relative to pivot

@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NatesJauntyTools.EditorDetails
+namespace NatesJauntyTools.Details
 {
 	// https://wiki.creativecommons.org/wiki/best_practices_for_attribution
 	
 	
 	// Used for creating the asset if it's ever deleted
-	// [CreateAssetMenu(menuName = "Nate's Cool Tools/Editor Details/Attribution", fileName = "Attribution")] 
+	// [CreateAssetMenu(menuName = "Nate's Jaunty Tools/Editor Details/Attribution", fileName = "Attribution")] 
 	public class AttributionAsset : ScriptableObject
 	{
 		public List<AttributionItem> attributionItems;

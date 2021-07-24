@@ -9,7 +9,7 @@ using Google.Apis.Sheets.v4.Data;
 
 namespace NatesJauntyTools.GoogleSheets
 {
-	[CreateAssetMenu(menuName = "Nate's Cool Tools/Google Sheet Link", fileName = "New Google Sheet Link")]
+	[CreateAssetMenu(menuName = "Nate's Jaunty Tools/Google Sheets/Google Sheet Link", fileName = "New Google Sheet Link")]
 	public class GoogleSheetLink : ScriptableObject
 	{
 		#region Global Variables

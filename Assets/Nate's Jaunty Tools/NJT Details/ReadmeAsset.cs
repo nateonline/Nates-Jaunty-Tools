@@ -2,25 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NatesJauntyTools.EditorDetails
+namespace NatesJauntyTools.Details
 {
 	// Used for creating the asset if it's ever deleted
-	// [CreateAssetMenu(menuName = "Nate's Cool Tools/Editor Details/Readme", fileName = "Read Me")] 
+	// [CreateAssetMenu(menuName = "Nate's Jaunty Tools/Editor Details/Readme", fileName = "Read Me")] 
 	public class ReadmeAsset : ScriptableObject
 	{
-		public string version_niceNumber;
-		public string version_trueNumber;
+		public string versionNumber;
+		public int[] VersionSections
+		{
+			get
+			{
+				string[] stringSections = versionNumber.Split('.');
+				int[] intSections = new int[stringSections.Length];
+				for (int i = 0; i < stringSections.Length; i++) { intSections[i] = int.Parse(stringSections[i]); }
+				return intSections;
+			}
+		}
+
+		public string unityVersion;
 
 		public List<ChangeLogItem> changeLog;
 
 		public void ApplyData()
 		{
-			version_niceNumber = "0.0.1";
-			version_trueNumber = "00.00.01";
+			versionNumber = "2021.07.24";
+			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Modified, "Created Nate's Jaunty Tools")
+				new ChangeLogItem(ChangeType.Modified, "Changed versioning system to date format (removed friendly/actual distincion)"),
+				new ChangeLogItem(ChangeType.Added, "Added \"LastIndex\" extension method for Lists"),
+				new ChangeLogItem(ChangeType.Added, "Added extensions for Stopwatches, Types & Reflection, and RectTransforms"),
 			};
 		}
 	}

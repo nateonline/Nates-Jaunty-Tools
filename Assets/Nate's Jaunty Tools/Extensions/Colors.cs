@@ -12,6 +12,9 @@ namespace NatesJauntyTools
 		}
 
 		/// <summary> Get the hex code (uppercase with leading #) from a color. </summary>
+		public static string ToHex(this Color color) { return ((Color32)color).ToHex(); }
+
+		/// <summary> Get the hex code (uppercase with leading #) from a color. </summary>
 		public static string ToHex(this Color32 color)
 		{
 			int[] characterValues = new int[8];

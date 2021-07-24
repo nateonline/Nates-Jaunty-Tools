@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace NatesJauntyTools.EditorDetails
+namespace NatesJauntyTools.Details
 {
 	[CustomEditor(typeof(ReadmeAsset), true)]
 	public class ReadmeEditor : Editor
@@ -41,8 +41,8 @@ namespace NatesJauntyTools.EditorDetails
 			
 			EditorGUILayout.LabelField("Version", EditorStyles.boldLabel);
 			EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.LabelField(readme.version_niceNumber);
-			EditorGUILayout.LabelField(readme.version_trueNumber, greyText);
+			EditorGUILayout.LabelField(readme.versionNumber);
+			EditorGUILayout.LabelField($"Built in Unity {readme.unityVersion}", greyText);
 			EditorGUILayout.EndHorizontal();
 		}
 
