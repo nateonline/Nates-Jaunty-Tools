@@ -1,18 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class OpCodes : MonoBehaviour
+/**/
+public enum OpCode
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	ChatMessage = 1,
+	PlayerPosition = 2,
 }
+
+public static class OpCodeExtensions
+{
+	public static byte ToByte(this OpCode opCode) { return (byte)opCode; }
+
+	public static OpCode ToOpCode(this byte b) { return (OpCode)b; }
+}
+/**/
+
+
+/**
+public static class OpCode
+{
+	public const byte ChatMessage = 1;
+	public const byte PlayerPosition = 2;
+}
+/**/
