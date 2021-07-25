@@ -48,11 +48,11 @@ namespace NatesJauntyTools.NetCode
 
 		protected void UpdateMessagePump()
 		{
-			DataStreamReader stream;
+			DataStreamReader reader;
 			
 			NetworkEvent.Type cmd;
 			int safetyNetCounter = 1000;
-			while (safetyNetCounter > 0 && (cmd = serverConnection.PopEvent(driver, out stream)) != NetworkEvent.Type.Empty)
+			while (safetyNetCounter > 0 && (cmd = serverConnection.PopEvent(driver, out reader)) != NetworkEvent.Type.Empty)
 			{
 				if (--safetyNetCounter == 0) { Debug.LogError("CLIENT: Hit max iterations, exiting", gameObject); return; }
 
@@ -62,8 +62,7 @@ namespace NatesJauntyTools.NetCode
 				}
 				else if (cmd == NetworkEvent.Type.Data)
 				{
-					uint number = stream.ReadByte();
-					Debug.Log($"CLIENT: Got {number} back from the server");
+					OnData(reader);
 				}
 				else if (cmd == NetworkEvent.Type.Disconnect)
 				{
@@ -72,6 +71,21 @@ namespace NatesJauntyTools.NetCode
 				}
 				else { Debug.Log($"CLIENT: Received {cmd} from client unexpectedly"); }
 			}
+		}
+
+		public virtual void OnData(DataStreamReader reader)
+		{
+			BaseMessage message = null;
+			OpCode opCode = reader.ReadByte().ToOpCode();
+
+			switch (opCode)
+			{
+				case OpCode.ChatMessage: message = new ChatMessage(reader); break;
+				case OpCode.PlayerPosition: message = new PlayerPosition(reader); break;
+				default: Debug.LogWarning($"SERVER: Didn't understand OpCode {opCode}"); break;
+			}
+
+			message.ReceivedOnClient();
 		}
 
 		public virtual void SendToServer(BaseMessage message)

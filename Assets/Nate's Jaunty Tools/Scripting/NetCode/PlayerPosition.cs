@@ -52,6 +52,14 @@ public class PlayerPosition : BaseMessage
 		PositionZ = reader.ReadFloat();
 	}
 
-	public override void ReceivedOnClient() { Debug.Log($"CLIENT: pID={PlayerID} x={PositionX} y={PositionY} z={PositionZ}"); }
-	public override void ReceivedOnServer() { Debug.Log($"SERVER: pID={PlayerID} x={PositionX} y={PositionY} z={PositionZ}"); }
+	public override void ReceivedOnClient()
+	{
+		Debug.Log($"CLIENT: pID={PlayerID} x={PositionX} y={PositionY} z={PositionZ}");
+	}
+
+	public override void ReceivedOnServer(BaseServer server)
+	{
+		Debug.Log($"SERVER: pID={PlayerID} x={PositionX} y={PositionY} z={PositionZ}");
+		server.SendToAllClients(this);
+	}
 }

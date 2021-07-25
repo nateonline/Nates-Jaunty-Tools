@@ -114,7 +114,23 @@ namespace NatesJauntyTools.NetCode
 				default: Debug.LogWarning($"SERVER: Didn't understand OpCode {opCode}"); break;
 			}
 
-			message.ReceivedOnServer();
+			message.ReceivedOnServer(this);
+		}
+
+		public virtual void SendToClient(NetworkConnection clientConnection, BaseMessage message)
+		{
+			DataStreamWriter writer;
+			driver.BeginSend(clientConnection, out writer);
+			message.Serialize(ref writer);
+			driver.EndSend(writer);
+		}
+
+		public virtual void SendToAllClients(BaseMessage message)
+		{
+			foreach (NetworkConnection client in clientConnections)
+			{
+				if (client.IsCreated) { SendToClient(client, message); }
+			}
 		}
 	}
 }

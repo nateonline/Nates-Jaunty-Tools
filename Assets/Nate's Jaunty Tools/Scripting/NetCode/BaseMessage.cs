@@ -12,6 +12,6 @@ namespace NatesJauntyTools.NetCode
 		public virtual void Deserialize(DataStreamReader reader) {}
 
 		public virtual void ReceivedOnClient() {}
-		public virtual void ReceivedOnServer() {}
+		public virtual void ReceivedOnServer(BaseServer server) {}
 	}
 }

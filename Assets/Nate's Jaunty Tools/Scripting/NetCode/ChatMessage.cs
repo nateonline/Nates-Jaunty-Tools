@@ -41,5 +41,5 @@ public class ChatMessage : BaseMessage
 	}
 
 	public override void ReceivedOnClient() { Debug.Log($"CLIENT: {MessageText}"); }
-	public override void ReceivedOnServer() { Debug.Log($"SERVER: {MessageText}"); }
+	public override void ReceivedOnServer(BaseServer server) { Debug.Log($"SERVER: {MessageText}"); }
 }
