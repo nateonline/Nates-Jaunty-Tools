@@ -6,42 +6,47 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public class BaseClient : MonoBehaviour
+	public abstract class BaseClient : Script
 	{
-		public NetworkDriver driver;
+		protected NetworkDriver driver;
 		protected NetworkConnection serverConnection;
 
-
-		#if UNITY_EDITOR
-		private void Start() { Initialize(); }
-		private void OnDestroy() { Shutdown(); }
-		private void Update() { UpdateClient(); }
-		#endif
-
 		
-		public virtual void Initialize()
+		public virtual void Initialize(string address, ushort port)
 		{
 			driver = NetworkDriver.Create();
 			serverConnection = default(NetworkConnection);
 
-			NetworkEndPoint endPoint = NetworkEndPoint.LoopbackIpv4;
-			endPoint.Port = 1414;
+			NetworkEndPoint endPoint;
+			if (address == "localhost")
+			{
+				endPoint = NetworkEndPoint.LoopbackIpv4;
+				endPoint.Port = port;
+			}
+			else
+			{
+				endPoint = NetworkEndPoint.Parse(address, port);
+			}
 			serverConnection = driver.Connect(endPoint);
 		}
 
 		public virtual void Shutdown()
 		{
 			if (driver.IsCreated) driver.Dispose();
+			else { Debug.LogWarning("No driver to dispose of"); }
 		}
 
-		public virtual void UpdateClient()
+		protected virtual void UpdateClient()
 		{
-			driver.ScheduleUpdate().Complete();
-			CheckAlive();
-			UpdateMessagePump();
+			if (driver.IsCreated)
+			{
+				driver.ScheduleUpdate().Complete();
+				CheckAlive();
+				UpdateMessagePump();
+			}
 		}
 
-		private void CheckAlive()
+		void CheckAlive()
 		{
 			if (!serverConnection.IsCreated) { Debug.Log("CLIENT: Something went wrong, lost connection to server!"); }
 		}
@@ -73,22 +78,9 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		public virtual void OnData(DataStreamReader reader)
-		{
-			BaseMessage message = null;
-			OpCode opCode = reader.ReadByte().ToOpCode();
+		protected abstract void OnData(DataStreamReader reader);
 
-			switch (opCode)
-			{
-				case OpCode.ChatMessage: message = new ChatMessage(reader); break;
-				case OpCode.PlayerPosition: message = new PlayerPosition(reader); break;
-				default: Debug.LogWarning($"SERVER: Didn't understand OpCode {opCode}"); break;
-			}
-
-			message.ReceivedOnClient();
-		}
-
-		public virtual void SendToServer(BaseMessage message)
+		public void SendToServer(BaseMessage message)
 		{
 			DataStreamWriter writer;
 			driver.BeginSend(serverConnection, out writer);

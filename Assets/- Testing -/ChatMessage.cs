@@ -7,7 +7,8 @@ using NatesJauntyTools.NetCode;
 
 public class ChatMessage : BaseMessage
 {
-    FixedString128 MessageText { get; set; }
+    public byte PlayerID { get; set; }
+	public FixedString512 Text { get; set; }
 
 	
 	public ChatMessage()
@@ -15,31 +16,29 @@ public class ChatMessage : BaseMessage
 		Code = OpCode.ChatMessage.ToByte();
 	}
 
-	public ChatMessage(DataStreamReader reader)
+    public ChatMessage(DataStreamReader reader)
 	{
 		Code = OpCode.ChatMessage.ToByte();
 		Deserialize(reader);
 	}
-	
-	public ChatMessage(string messageText)
+
+	public ChatMessage(byte playerID, FixedString512 text)
 	{
 		Code = OpCode.ChatMessage.ToByte();
-		MessageText = messageText;
+		PlayerID = playerID;
+		Text = text;
 	}
 
-	
 	public override void Serialize(ref DataStreamWriter writer)
 	{
 		writer.WriteByte(Code);
-		writer.WriteFixedString128(MessageText);
+		writer.WriteByte(PlayerID);
+		writer.WriteFixedString512(Text);
 	}
 
 	public override void Deserialize(DataStreamReader reader)
 	{
-		// Already read first byte / op code
-		MessageText = reader.ReadFixedString128();
+		PlayerID = reader.ReadByte();
+		Text = reader.ReadFixedString512();
 	}
-
-	public override void ReceivedOnClient() { Debug.Log($"CLIENT: {MessageText}"); }
-	public override void ReceivedOnServer(BaseServer server) { Debug.Log($"SERVER: {MessageText}"); }
 }

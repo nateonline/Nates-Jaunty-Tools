@@ -6,33 +6,23 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public class BaseServer : MonoBehaviour
+	public abstract class BaseServer : Script
 	{
-		public NetworkDriver driver;
+		protected NetworkDriver driver;
 		protected NativeList<NetworkConnection> clientConnections;
 
-		public const int MAX_CONNECTIONS = 4;
-		public ushort port = 1414;
 
-
-		#if UNITY_EDITOR
-		private void Start() { Initialize(); }
-		private void OnDestroy() { Shutdown(); }
-		private void Update() { UpdateServer(); }
-		#endif
-
-
-		public virtual void Initialize()
+		public virtual void Initialize(int maxConnections, ushort port)
 		{
 			// Initialize Driver
 			driver = NetworkDriver.Create();
-			NetworkEndPoint endPoint = NetworkEndPoint.AnyIpv4; // Who can connect to us
+			NetworkEndPoint endPoint = NetworkEndPoint.AnyIpv4; // Who can connect to the server
 			endPoint.Port = port;
 			if (driver.Bind(endPoint) != 0) { Debug.LogWarning($"SERVER: There was an error binding to port {endPoint.Port}"); }
 			else { driver.Listen(); }
 
 			// Initialize Connection List
-			clientConnections = new NativeList<NetworkConnection>(MAX_CONNECTIONS, Allocator.Persistent);
+			clientConnections = new NativeList<NetworkConnection>(maxConnections, Allocator.Persistent);
 		}
 
 		public virtual void Shutdown()
@@ -44,15 +34,18 @@ namespace NatesJauntyTools.NetCode
 			else { Debug.LogWarning("No client connections to dispose of"); }
 		}
 
-		public virtual void UpdateServer()
+		protected void UpdateServer()
 		{
-			driver.ScheduleUpdate().Complete();
-			CleanupConnections();
-			AcceptNewConnections();
-			UpdateMessagePump();
+			if (driver.IsCreated)
+			{
+				driver.ScheduleUpdate().Complete();
+				CleanupConnections();
+				AcceptNewConnections();
+				UpdateMessagePump();
+			}
 		}
 
-		private void CleanupConnections()
+		void CleanupConnections()
 		{
 			for (int i = 0; i < clientConnections.Length; i++)
 			{
@@ -64,7 +57,7 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		private void AcceptNewConnections()
+		void AcceptNewConnections()
 		{
 			NetworkConnection c;
 			int safetyNetCounter = 100;
@@ -102,22 +95,9 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		public virtual void OnData(DataStreamReader reader)
-		{
-			BaseMessage message = null;
-			OpCode opCode = reader.ReadByte().ToOpCode();
+		protected abstract void OnData(DataStreamReader reader);
 
-			switch (opCode)
-			{
-				case OpCode.ChatMessage: message = new ChatMessage(reader); break;
-				case OpCode.PlayerPosition: message = new PlayerPosition(reader); break;
-				default: Debug.LogWarning($"SERVER: Didn't understand OpCode {opCode}"); break;
-			}
-
-			message.ReceivedOnServer(this);
-		}
-
-		public virtual void SendToClient(NetworkConnection clientConnection, BaseMessage message)
+		public void SendToClient(NetworkConnection clientConnection, BaseMessage message)
 		{
 			DataStreamWriter writer;
 			driver.BeginSend(clientConnection, out writer);
@@ -125,7 +105,7 @@ namespace NatesJauntyTools.NetCode
 			driver.EndSend(writer);
 		}
 
-		public virtual void SendToAllClients(BaseMessage message)
+		public void SendToAllClients(BaseMessage message)
 		{
 			foreach (NetworkConnection client in clientConnections)
 			{
