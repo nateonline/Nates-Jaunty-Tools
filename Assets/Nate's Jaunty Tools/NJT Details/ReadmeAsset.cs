@@ -26,7 +26,7 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2021.07.24";
+			versionNumber = "2021.07.27";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
@@ -34,7 +34,8 @@ namespace NatesJauntyTools.Details
 				new ChangeLogItem(ChangeType.Modified, "Changed versioning system to date format (removed friendly/actual distincion)"),
 				new ChangeLogItem(ChangeType.Added, "Added \"LastIndex\" extension method for Lists"),
 				new ChangeLogItem(ChangeType.Added, "Added extensions for Stopwatches, Types & Reflection, and RectTransforms"),
-				new ChangeLogItem(ChangeType.Added, "Added preview Network Transport package (v0.8.0) as a dependency")
+				new ChangeLogItem(ChangeType.Added, "Added preview Network Transport package (v0.8.0) as a dependency"),
+				new ChangeLogItem(ChangeType.Added, "Added NetCode folder with abstract classes for client, server, and messages"),
 			};
 		}
 	}
