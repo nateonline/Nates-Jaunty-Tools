@@ -17,6 +17,8 @@ namespace NatesJauntyTools.NetCode
 		{
 			if (!IsInitialized)
 			{
+				Debug.Log("CLIENT: Initializing");
+
 				driver = NetworkDriver.Create();
 				serverConnection = default(NetworkConnection);
 
