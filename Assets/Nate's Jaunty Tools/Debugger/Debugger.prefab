@@ -397,10 +397,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74d61e39e5ffd414bbf3bd25d254aa68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  window: {fileID: 0}
-  scrollRect: {fileID: 0}
-  logsText: {fileID: 0}
-  commandField: {fileID: 0}
+  window: {fileID: 4311968809990085537}
+  scrollRect: {fileID: 7455967508258976161}
+  logsText: {fileID: 4311968808904653639}
+  commandField: {fileID: 4311968808986710231}
   toggleKey: 293
   timestampDateBool: 0
   timestampTimeBool: 1
@@ -785,10 +785,10 @@ RectTransform:
   m_Father: {fileID: 3134490345225052644}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 300}
+  m_SizeDelta: {x: 165.01, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &4311968808904653636
 CanvasRenderer:
@@ -1191,7 +1191,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4311968809990085542
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1396,7 +1396,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1512,9 +1512,9 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &6198209502456859075
 CanvasRenderer:
@@ -1603,7 +1603,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &9030191745037589241
 MonoBehaviour:

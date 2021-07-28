@@ -4,11 +4,12 @@ using UnityEngine;
 using Unity.Networking.Transport;
 using NatesJauntyTools;
 using NatesJauntyTools.NetCode;
+using TMPro;
 
 public class Client : BaseClient
 {
 	[Header("Networking")]
-	public string address = "localhost";
+	public TMP_InputField serverAddress;
 	public ushort port = 1414;
 
 	[Header("Other References")]
@@ -24,7 +25,7 @@ public class Client : BaseClient
 
 
 	[InspectorButton]
-	public void StartClient() { InitializeClient(address, port); }
+	public void StartClient() { InitializeClient(serverAddress.text, port); }
 
 
 	protected override void OnData(DataStreamReader reader)
