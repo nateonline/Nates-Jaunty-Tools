@@ -8,35 +8,60 @@ namespace NatesJauntyTools.NetCode
 {
 	public abstract class BaseServer : Script
 	{
+		[ReadOnly] public bool IsInitialized;
 		protected NetworkDriver driver;
 		protected NativeList<NetworkConnection> clientConnections;
 
 
-		public virtual void Initialize(int maxConnections, ushort port)
+		public virtual void InitializeServer(int maxConnections, ushort port)
 		{
-			// Initialize Driver
-			driver = NetworkDriver.Create();
-			NetworkEndPoint endPoint = NetworkEndPoint.AnyIpv4; // Who can connect to the server
-			endPoint.Port = port;
-			if (driver.Bind(endPoint) != 0) { Debug.LogWarning($"SERVER: There was an error binding to port {endPoint.Port}"); }
-			else { driver.Listen(); }
+			if (!IsInitialized)
+			{
+				Debug.Log("SERVER: Initializing");
 
-			// Initialize Connection List
-			clientConnections = new NativeList<NetworkConnection>(maxConnections, Allocator.Persistent);
+				// Initialize Driver
+				driver = NetworkDriver.Create();
+				NetworkEndPoint endPoint = NetworkEndPoint.AnyIpv4; // Who can connect to the server
+				endPoint.Port = port;
+
+				if (driver.Bind(endPoint) != 0)
+				{
+					Debug.LogWarning($"SERVER: There was an error binding to port {endPoint.Port}");
+				}
+				else
+				{
+					driver.Listen();
+					IsInitialized = true;
+
+					// Initialize Connection List
+					clientConnections = new NativeList<NetworkConnection>(maxConnections, Allocator.Persistent);
+				}
+			}
+			else
+			{
+				Debug.LogWarning("SERVER: Can't initialize server, it's already initialized");
+			}
 		}
 
-		public virtual void Shutdown()
+		public virtual void ShutdownServer()
 		{
-			if (driver.IsCreated) { driver.Dispose(); }
-			else { Debug.LogWarning("No driver to dispose of"); }
+			if (IsInitialized)
+			{
+				Debug.Log("SERVER: Shutting down");
 
-			if (clientConnections.IsCreated) { clientConnections.Dispose(); }
-			else { Debug.LogWarning("No client connections to dispose of"); }
+				if (driver.IsCreated) { driver.Dispose(); }
+				else { Debug.LogWarning("SERVER: No driver to dispose of"); }
+
+				if (clientConnections.IsCreated) { clientConnections.Dispose(); }
+				else { Debug.LogWarning("SERVER: No client connections to dispose of"); }
+			}
+
+			IsInitialized = false;
 		}
 
 		protected void UpdateServer()
 		{
-			if (driver.IsCreated)
+			if (IsInitialized)
 			{
 				driver.ScheduleUpdate().Complete();
 				CleanupConnections();
@@ -57,7 +82,7 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		void AcceptNewConnections()
+		protected virtual void AcceptNewConnections()
 		{
 			NetworkConnection c;
 			int safetyNetCounter = 100;
@@ -67,8 +92,11 @@ namespace NatesJauntyTools.NetCode
 
 				clientConnections.Add(c);
 				Debug.Log("SERVER: Accepted a connection");
+				OnNewConnection(c);
 			}
 		}
+
+		protected virtual void OnNewConnection(NetworkConnection connection) { }
 
 		protected void UpdateMessagePump()
 		{
@@ -99,18 +127,26 @@ namespace NatesJauntyTools.NetCode
 
 		public void SendToClient(NetworkConnection clientConnection, BaseMessage message)
 		{
-			DataStreamWriter writer;
-			driver.BeginSend(clientConnection, out writer);
-			message.Serialize(ref writer);
-			driver.EndSend(writer);
+			if (IsInitialized)
+			{
+				DataStreamWriter writer;
+				driver.BeginSend(clientConnection, out writer);
+				message.Serialize(ref writer);
+				driver.EndSend(writer);
+			}
+			else { Debug.LogWarning("SERVER: Can't send message to client, server isn't initialized"); }
 		}
 
 		public void SendToAllClients(BaseMessage message)
 		{
-			foreach (NetworkConnection client in clientConnections)
+			if (IsInitialized)
 			{
-				if (client.IsCreated) { SendToClient(client, message); }
+				foreach (NetworkConnection client in clientConnections)
+				{
+					if (client.IsCreated) { SendToClient(client, message); }
+				}
 			}
+			else { Debug.LogWarning("SERVER: Can't send message to all clients, server isn't initialized"); }
 		}
 	}
 }

@@ -7,30 +7,33 @@ using NatesJauntyTools.NetCode;
 
 public class Server : BaseServer
 {
-    public int maxConnections = 8;
-	public ushort port;
-	
+	public int maxConnections = 8;
+	public ushort port = 1414;
+	public byte playerCount = 0;
 
-	void Update() { UpdateServer(); }
-	void OnDestroy() { Shutdown(); }
-	
 
 	[InspectorButton]
-	public void StartServer() { Initialize(maxConnections, port); }
+	public void StartServer() { InitializeServer(maxConnections, port); }
+
+	void Update() { UpdateServer(); }
+	void OnDestroy() { ShutdownServer(); }
 
 
-    protected override void OnData(DataStreamReader reader)
+	protected override void OnData(DataStreamReader reader)
 	{
-		OpCode opCode = reader.ReadByte().ToOpCode();
+		OpCode opCode = (OpCode)reader.ReadByte();
 		switch (opCode)
 		{
-			case OpCode.ChatMessage: ReceiveChatMessage(new ChatMessage(reader)); break;
+			case OpCode.ChatMessage: SendToAllClients(new ChatMessage(reader)); break;
+			case OpCode.PlayerPosition: SendToAllClients(new PlayerPosition(reader)); break;
 			default: Debug.LogWarning($"SERVER: Didn't understand OpCode {opCode}", gameObject); break;
 		}
 	}
 
-	void ReceiveChatMessage(ChatMessage chatMessage)
+	protected override void OnNewConnection(NetworkConnection connection)
 	{
-		SendToAllClients(chatMessage);
+		playerCount++;
+		SendToClient(connection, new AssignPlayerID(playerCount));
+		Debug.Log($"SERVER: Assigned player ID {playerCount}");
 	}
 }

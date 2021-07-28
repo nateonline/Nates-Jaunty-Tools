@@ -11,7 +11,7 @@ namespace NatesJauntyTools
 		public override void OnGUI(Rect position, SerializedProperty prop, GUIContent label)
 		{
 			EditorGUI.BeginDisabledGroup(true);
-			EditorGUI.PropertyField(position, prop);
+			EditorGUI.PropertyField(position, prop, label);
 			EditorGUI.EndDisabledGroup();
 		}
 	}

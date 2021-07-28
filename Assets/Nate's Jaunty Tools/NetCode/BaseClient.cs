@@ -8,37 +8,51 @@ namespace NatesJauntyTools.NetCode
 {
 	public abstract class BaseClient : Script
 	{
+		[ReadOnly] public bool IsInitialized;
 		protected NetworkDriver driver;
 		protected NetworkConnection serverConnection;
 
-		
-		public virtual void Initialize(string address, ushort port)
-		{
-			driver = NetworkDriver.Create();
-			serverConnection = default(NetworkConnection);
 
-			NetworkEndPoint endPoint;
-			if (address == "localhost")
+		public virtual void InitializeClient(string address, ushort port)
+		{
+			if (!IsInitialized)
 			{
-				endPoint = NetworkEndPoint.LoopbackIpv4;
-				endPoint.Port = port;
+				driver = NetworkDriver.Create();
+				serverConnection = default(NetworkConnection);
+
+				NetworkEndPoint endPoint;
+				if (address == "localhost")
+				{
+					endPoint = NetworkEndPoint.LoopbackIpv4;
+					endPoint.Port = port;
+				}
+				else
+				{
+					endPoint = NetworkEndPoint.Parse(address, port);
+				}
+
+				serverConnection = driver.Connect(endPoint);
+				IsInitialized = true;
 			}
-			else
-			{
-				endPoint = NetworkEndPoint.Parse(address, port);
-			}
-			serverConnection = driver.Connect(endPoint);
+			else { Debug.LogWarning("CLIENT: Can't initialize client, it's already initialized"); }
 		}
 
-		public virtual void Shutdown()
+		public virtual void ShutdownClient()
 		{
-			if (driver.IsCreated) driver.Dispose();
-			else { Debug.LogWarning("No driver to dispose of"); }
+			if (IsInitialized)
+			{
+				Debug.Log("CLIENT: Shutting down");
+
+				if (driver.IsCreated) driver.Dispose();
+				else { Debug.LogWarning("CLIENT: No driver to dispose of"); }
+			}
+
+			IsInitialized = false;
 		}
 
 		protected virtual void UpdateClient()
 		{
-			if (driver.IsCreated)
+			if (IsInitialized)
 			{
 				driver.ScheduleUpdate().Complete();
 				CheckAlive();
@@ -54,7 +68,7 @@ namespace NatesJauntyTools.NetCode
 		protected void UpdateMessagePump()
 		{
 			DataStreamReader reader;
-			
+
 			NetworkEvent.Type cmd;
 			int safetyNetCounter = 1000;
 			while (safetyNetCounter > 0 && (cmd = serverConnection.PopEvent(driver, out reader)) != NetworkEvent.Type.Empty)
@@ -63,7 +77,7 @@ namespace NatesJauntyTools.NetCode
 
 				if (cmd == NetworkEvent.Type.Connect)
 				{
-					Debug.Log($"CLIENT: We are now connected to the server!");
+					Debug.Log($"CLIENT: Connected to the server");
 				}
 				else if (cmd == NetworkEvent.Type.Data)
 				{
@@ -71,10 +85,10 @@ namespace NatesJauntyTools.NetCode
 				}
 				else if (cmd == NetworkEvent.Type.Disconnect)
 				{
-					Debug.Log("CLIENT: Client has disconnected from the server");
+					Debug.Log("CLIENT: Disconnected from the server");
 					serverConnection = default(NetworkConnection);
 				}
-				else { Debug.Log($"CLIENT: Received {cmd} from client unexpectedly"); }
+				else { Debug.Log($"CLIENT: Received {cmd} from server unexpectedly"); }
 			}
 		}
 
@@ -82,10 +96,14 @@ namespace NatesJauntyTools.NetCode
 
 		public void SendToServer(BaseMessage message)
 		{
-			DataStreamWriter writer;
-			driver.BeginSend(serverConnection, out writer);
-			message.Serialize(ref writer);
-			driver.EndSend(writer);
+			if (IsInitialized)
+			{
+				DataStreamWriter writer;
+				driver.BeginSend(serverConnection, out writer);
+				message.Serialize(ref writer);
+				driver.EndSend(writer);
+			}
+			else { Debug.LogWarning("CLIENT: Can't send message to server, client isn't initialized"); }
 		}
 	}
 }

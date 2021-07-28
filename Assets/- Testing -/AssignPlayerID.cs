@@ -5,41 +5,37 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using NatesJauntyTools.NetCode;
 
-public class ChatMessage : BaseMessage
+public class AssignPlayerID : BaseMessage
 {
 	public byte PlayerID { get; set; }
-	public FixedString512 Text { get; set; }
 
 
-	public ChatMessage()
+	public AssignPlayerID()
 	{
-		Code = (byte)OpCode.ChatMessage;
+		Code = (byte)OpCode.AssignPlayerID;
 	}
 
-	public ChatMessage(DataStreamReader reader)
+	public AssignPlayerID(DataStreamReader reader)
 	{
-		Code = (byte)OpCode.ChatMessage;
+		Code = (byte)OpCode.AssignPlayerID;
 		Deserialize(reader);
 	}
 
-	public ChatMessage(byte playerID, FixedString512 text)
+	public AssignPlayerID(byte playerID)
 	{
-		Code = (byte)OpCode.ChatMessage;
+		Code = (byte)OpCode.AssignPlayerID;
 		PlayerID = playerID;
-		Text = text;
 	}
 
 	public override void Serialize(ref DataStreamWriter writer)
 	{
 		writer.WriteByte(Code);
 		writer.WriteByte(PlayerID);
-		writer.WriteFixedString512(Text);
 	}
 
 	public override void Deserialize(DataStreamReader reader)
 	{
 		// Already read code byte
 		PlayerID = reader.ReadByte();
-		Text = reader.ReadFixedString512();
 	}
 }

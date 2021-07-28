@@ -6,15 +6,15 @@ using TMPro;
 
 public class ChatUI : MonoBehaviour
 {
-    [SerializeField] Client client;
-	
+	[SerializeField] Client client;
+
 	[SerializeField] TMP_InputField inputField;
 	[SerializeField] TMP_Text chatMessageDisplay;
-	
-	
+
+
 	public void SendChat()
 	{
-		ChatMessage chatMessage = new ChatMessage(1, inputField.text);
+		ChatMessage chatMessage = new ChatMessage(client.PlayerID, inputField.text);
 		client.SendToServer(chatMessage);
 	}
 
