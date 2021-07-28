@@ -9,7 +9,7 @@ using TMPro;
 public class Client : BaseClient
 {
 	[Header("Networking")]
-	public TMP_InputField serverAddress;
+	public string address;
 	public ushort port = 1414;
 
 	[Header("Other References")]
@@ -25,7 +25,7 @@ public class Client : BaseClient
 
 
 	[InspectorButton]
-	public void StartClient() { InitializeClient(serverAddress.text, port); }
+	public void StartClient() { InitializeClient(address, port); }
 
 
 	protected override void OnData(DataStreamReader reader)
