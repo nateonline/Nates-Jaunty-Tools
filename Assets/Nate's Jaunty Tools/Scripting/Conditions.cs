@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NatesJauntyTools
@@ -101,6 +103,20 @@ namespace NatesJauntyTools
 					return (values[i]) ? $"[{names[i]} : {trueCharacter}]" : $"[{names[i]} : {falseCharacter}]";
 				}
 			}
+		}
+
+		public string GetFailures()
+		{
+			List<string> failures = new List<string>();
+			for (int i = 0; i < values.Length; i++) { if (!values[i]) { failures.Add(names[i]); } }
+			return String.Join(", ", failures);
+		}
+
+		public string GetSuccesses()
+		{
+			List<string> successes = new List<string>();
+			for (int i = 0; i < values.Length; i++) { if (values[i]) { successes.Add(names[i]); } }
+			return String.Join(", ", successes);
 		}
 	}
 }

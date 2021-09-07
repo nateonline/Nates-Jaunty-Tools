@@ -162,5 +162,9 @@ namespace NatesJauntyTools
 
 			return true;
 		}
+
+		public static bool RepresentsTrue(this string arg) { return (arg == "t" || arg == "true" || arg == "y" || arg == "yes"); }
+
+		public static bool RepresentsFalse(this string arg) { return (arg == "f" || arg == "false" || arg == "n" || arg == "no"); }
 	}
 }

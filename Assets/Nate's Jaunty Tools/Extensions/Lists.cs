@@ -82,5 +82,7 @@ namespace NatesJauntyTools
 		}
 
 		public static int LastIndex<T>(this IList<T> list) { return list.Count - 1; }
+
+		public static T LastItem<T>(this IList<T> list) { return list[list.LastIndex()]; }
 	}
 }

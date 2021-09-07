@@ -22,16 +22,9 @@ namespace NatesJauntyTools.SpatialAudio
 		List<AudioReceiver> receivers = new List<AudioReceiver>();
 
 
-		#region Mono
-
-		protected override void SingletonAwake() { Initialize(); }
-
-		#endregion
-
-
 		#region Setup & Debug
 
-		void Initialize()
+		protected override void PostInitialize()
 		{
 			listener = ForceInitializeComponent<AudioListener>();
 			directSource = ForceInitializeComponent<AudioSource>();
