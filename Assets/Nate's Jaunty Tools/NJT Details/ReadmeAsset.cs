@@ -26,15 +26,12 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2021.08.23";
+			versionNumber = "2021.09.22";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Modified, "Renamed \"Debugger\" to \"Console\""),
-				new ChangeLogItem(ChangeType.Added, "Added timestamp selection to the console"),
-				new ChangeLogItem(ChangeType.Added, "Added new log types to the console"),
-				new ChangeLogItem(ChangeType.Added, "Added Console.Log as a static function"),
+				new ChangeLogItem(ChangeType.Added, "Added SingletonScriptableObjects"),
 			};
 		}
 	}

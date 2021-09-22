@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 namespace NatesJauntyTools
 {
 	/// <summary> Used for easy setup for Singletons. </summary>
-	/// <remarks> Currently the Singleton class utilizes the Awake MonoBehavior function for initialization, which means using the Awake function will override the automatic initialization. Use "PostInitialize" instead.</remarks>
+	/// <remarks> Currently the Singleton class utilizes the Awake MonoBehavior function for initialization, which means using the Awake function will override the automatic initialization. Use "PreInitialize" or "PostInitialize" instead.</remarks>
 	public abstract class Singleton<T> : Script where T : Singleton<T>
 	{
 		/// <summary> Singleton Instance Variable. </summary>
