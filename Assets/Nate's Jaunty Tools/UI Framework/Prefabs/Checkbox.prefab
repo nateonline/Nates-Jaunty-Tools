@@ -1215,6 +1215,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5310993300816865315, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
+      propertyPath: m_text
+      value: Checkbox
+      objectReference: {fileID: 0}
     - target: {fileID: 6392482517963243030, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1298,6 +1302,14 @@ PrefabInstance:
     - target: {fileID: 6392482517963243030, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7110781505874169968, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
+      propertyPath: fieldArea
+      value: 
+      objectReference: {fileID: 2517713781315957504}
+    - target: {fileID: 7110781505874169968, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
+      propertyPath: labelText
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7496203145429191572, guid: adcc833032c7a7647ab05eae22ecf327, type: 3}
       propertyPath: m_Name

@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Input Field
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -183,3 +183,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42786361e7753de4d9e6506610704a45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  labelText: 
+  labelTransform: {fileID: 1572962672861664365}
+  label: {fileID: 5310993300816865315}
+  fieldArea: {fileID: 0}
