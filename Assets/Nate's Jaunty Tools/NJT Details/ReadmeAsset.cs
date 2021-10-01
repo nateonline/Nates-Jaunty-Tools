@@ -26,12 +26,12 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2021.09.23";
+			versionNumber = "2021.10.01";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Added, "Added Force Builder for Singleton Scriptable Objects (Script & Prefab)"),
+				new ChangeLogItem(ChangeType.Added, "Added UI Framework basic fields (Scripts & Prefabs)"),
 			};
 		}
 	}
