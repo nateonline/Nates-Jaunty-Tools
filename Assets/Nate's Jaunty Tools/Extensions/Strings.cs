@@ -163,8 +163,8 @@ namespace NatesJauntyTools
 			return true;
 		}
 
-		public static bool RepresentsTrue(this string arg) { return (arg == "t" || arg == "true" || arg == "y" || arg == "yes"); }
+		public static bool RepresentsTrue(this string arg) { return (arg.ToLower() == "t" || arg.ToLower() == "true" || arg.ToLower() == "y" || arg.ToLower() == "yes"); }
 
-		public static bool RepresentsFalse(this string arg) { return (arg == "f" || arg == "false" || arg == "n" || arg == "no"); }
+		public static bool RepresentsFalse(this string arg) { return (arg.ToLower() == "f" || arg.ToLower() == "false" || arg.ToLower() == "n" || arg.ToLower() == "no"); }
 	}
 }
