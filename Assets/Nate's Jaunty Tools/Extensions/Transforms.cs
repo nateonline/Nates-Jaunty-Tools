@@ -48,5 +48,27 @@ namespace NatesJauntyTools
 
 			return children;
 		}
+
+		public static List<T> GetComponentsInChildrenOnly<T>(this Transform parent) where T : Component
+		{
+			List<T> componentsToReturn = new List<T>();
+
+			foreach (Transform child in parent.GetChildren())
+			{
+				if (child.TryGetComponent<T>(out T component)) componentsToReturn.Add(component);
+			}
+
+			return componentsToReturn;
+		}
+
+		public static T GetComponentInChildrenOnly<T>(this Transform parent) where T : Component
+		{
+			foreach (Transform child in parent.GetChildren())
+			{
+				if (child.TryGetComponent<T>(out T component)) return (component);
+			}
+
+			return null;
+		}
 	}
 }
