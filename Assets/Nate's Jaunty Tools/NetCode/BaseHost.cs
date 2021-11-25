@@ -6,7 +6,7 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public class BaseHost : MonoBehaviour
+	public abstract class BaseHost : MonoBehaviour
 	{
 		[ReadOnly] public bool IsInitialized;
 
