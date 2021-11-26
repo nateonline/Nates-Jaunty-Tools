@@ -44,6 +44,10 @@ namespace NatesJauntyTools.Examples.NetCode
 					}
 					break;
 
+				case "ip":
+					Log(Tools.GetLocalIPAddress());
+					break;
+
 				default:
 					Log($"Command \"{command}\" not recignized");
 					break;

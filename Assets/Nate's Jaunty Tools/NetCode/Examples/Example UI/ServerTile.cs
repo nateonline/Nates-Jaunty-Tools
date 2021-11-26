@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Unity.Collections;
 using TMPro;
+using NatesJauntyTools;
 
 namespace NatesJauntyTools.Examples.NetCode
 {
@@ -34,6 +35,10 @@ namespace NatesJauntyTools.Examples.NetCode
 
 				case "clear":
 					logs.text = "";
+					break;
+
+				case "ip":
+					Log(Tools.GetLocalIPAddress());
 					break;
 
 				default:
