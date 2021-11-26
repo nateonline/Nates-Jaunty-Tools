@@ -7,7 +7,7 @@ using NatesJauntyTools;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseNetPoint : Script
+	public abstract class NetPoint : Script
 	{
 		[ReadOnly] public bool IsInitialized;
 		protected NetworkDriver driver;

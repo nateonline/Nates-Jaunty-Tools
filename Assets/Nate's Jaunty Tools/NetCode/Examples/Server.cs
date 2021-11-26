@@ -13,19 +13,35 @@ namespace NatesJauntyTools.Examples.NetCode
 		public void StartServer() { Startup(); }
 
 
+		public override void Upkeep()
+		{
+			base.Upkeep();
+
+			if (IsInitialized && Mathf.RoundToInt(Time.time) % 5 == 0) { SendToAllClients(new KeepAlive()); }
+		}
+
 		protected override void OnData(DataStreamReader reader)
 		{
 			OpCode opCode = (OpCode)reader.ReadByte();
 			switch (opCode)
 			{
+				case OpCode.KeepAlive:
+					break;
+
 				case OpCode.ChatMessage:
-					SendToAllClients(new ChatMessage(reader));
+					ReceiveChatMessage(new ChatMessage(reader));
 					break;
 
 				default:
 					NetLog($"Didn't understand OpCode {opCode}");
 					break;
 			}
+		}
+
+		void ReceiveChatMessage(ChatMessage chatMessage)
+		{
+			NetLog($"[{chatMessage.PlayerID}]: {chatMessage.Text}");
+			SendToAllClients(chatMessage);
 		}
 
 		protected override void HandleNewConnection(NetworkConnection connection)

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Collections;
 using TMPro;
 
 namespace NatesJauntyTools.Examples.NetCode
@@ -13,6 +14,12 @@ namespace NatesJauntyTools.Examples.NetCode
 		void Awake() => server.OnNetLog += Log;
 		void OnDestroy() => server.OnNetLog -= Log;
 
+
+		protected override void OnSendChat(string message)
+		{
+			Log($"[0]: {message}");
+			server.SendToAllClients(new ChatMessage(0, new FixedString512(message)));
+		}
 
 		protected override void OnCommand(string command, string[] args)
 		{

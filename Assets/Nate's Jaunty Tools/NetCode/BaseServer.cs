@@ -7,7 +7,7 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseServer : BaseNetPoint
+	public abstract class BaseServer : NetPoint
 	{
 		public event Action<NetworkConnection> OnNewConnection;
 
@@ -129,7 +129,7 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		public void SendToClient(NetworkConnection clientConnection, BaseMessage message)
+		public void SendToClient(NetworkConnection clientConnection, NetMessage message)
 		{
 			if (IsInitialized)
 			{
@@ -141,7 +141,7 @@ namespace NatesJauntyTools.NetCode
 			else { NetLog("SERVER: Can't send message to client, server isn't initialized"); }
 		}
 
-		public void SendToAllClients(BaseMessage message)
+		public void SendToAllClients(NetMessage message)
 		{
 			if (IsInitialized)
 			{

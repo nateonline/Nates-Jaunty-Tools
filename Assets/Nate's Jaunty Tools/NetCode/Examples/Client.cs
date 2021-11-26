@@ -9,15 +9,29 @@ namespace NatesJauntyTools.Examples.NetCode
 {
 	public class Client : BaseClient
 	{
+		[ReadOnly] [SerializeField] protected byte playerID;
+		public byte PlayerID => playerID;
+
+
 		[InspectorButton]
 		public void StartClient() { Startup(); }
 
+
+		public override void Upkeep()
+		{
+			base.Upkeep();
+
+			if (IsInitialized && Mathf.RoundToInt(Time.time) % 5 == 0) { SendToServer(new KeepAlive()); }
+		}
 
 		protected override void OnData(DataStreamReader reader)
 		{
 			OpCode opCode = (OpCode)reader.ReadByte();
 			switch (opCode)
 			{
+				case OpCode.KeepAlive:
+					break;
+
 				case OpCode.AssignPlayerID:
 					ReceivePlayerID(new AssignPlayerID(reader));
 					break;
@@ -34,8 +48,8 @@ namespace NatesJauntyTools.Examples.NetCode
 
 		void ReceivePlayerID(AssignPlayerID assignPlayerID)
 		{
-			clientID = assignPlayerID.PlayerID;
-			NetLog($"Connected to {address} as ID {clientID}");
+			playerID = assignPlayerID.PlayerID;
+			NetLog($"Connected to {address} as ID {playerID}");
 		}
 
 		void ReceiveChatMessage(ChatMessage chatMessage)

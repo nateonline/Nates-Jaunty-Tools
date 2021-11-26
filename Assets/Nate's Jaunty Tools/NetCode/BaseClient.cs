@@ -6,14 +6,12 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseClient : BaseNetPoint
+	public abstract class BaseClient : NetPoint
 	{
 		protected NetworkConnection serverConnection;
 
 		public string address = "localhost";
 		public ushort port = 1414;
-		[ReadOnly] [SerializeField] protected byte clientID;
-		public byte ClientID => clientID;
 
 
 		public override void Startup()
@@ -111,7 +109,7 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		public void SendToServer(BaseMessage message)
+		public void SendToServer(NetMessage message)
 		{
 			if (IsInitialized)
 			{

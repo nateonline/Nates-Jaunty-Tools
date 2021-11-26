@@ -7,7 +7,7 @@ using NatesJauntyTools.NetCode;
 
 namespace NatesJauntyTools.Examples.NetCode
 {
-	public class AssignPlayerID : BaseMessage
+	public class AssignPlayerID : NetMessage
 	{
 		public byte PlayerID { get; set; }
 

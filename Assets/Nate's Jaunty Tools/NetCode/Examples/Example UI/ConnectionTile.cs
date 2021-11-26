@@ -34,10 +34,12 @@ namespace NatesJauntyTools.Examples.NetCode
 				}
 				else
 				{
-					Debug.Log($"Chat? {text}");
+					OnSendChat(text);
 				}
 			}
 		}
+
+		protected abstract void OnSendChat(string message);
 
 		protected abstract void OnCommand(string command, string[] args);
 	}

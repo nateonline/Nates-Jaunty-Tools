@@ -6,7 +6,7 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseHost : BaseNetPoint
+	public abstract class BaseHost : NetPoint
 	{
 		// TODO: Have this class find or create both components, initialize them, and handle the updates and shutdowns. Will also expose all of the public functions
 	}

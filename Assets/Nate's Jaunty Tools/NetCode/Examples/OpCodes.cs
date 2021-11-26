@@ -2,7 +2,8 @@ namespace NatesJauntyTools.Examples.NetCode
 {
 	public enum OpCode
 	{
-		AssignPlayerID = 0,
-		ChatMessage = 1,
+		KeepAlive = 0,
+		AssignPlayerID = 1,
+		ChatMessage = 2,
 	}
 }

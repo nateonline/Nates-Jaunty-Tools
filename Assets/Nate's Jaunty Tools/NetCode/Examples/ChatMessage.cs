@@ -7,7 +7,7 @@ using NatesJauntyTools.NetCode;
 
 namespace NatesJauntyTools.Examples.NetCode
 {
-	public class ChatMessage : BaseMessage
+	public class ChatMessage : NetMessage
 	{
 		public byte PlayerID { get; set; }
 		public FixedString512 Text { get; set; }
@@ -29,6 +29,13 @@ namespace NatesJauntyTools.Examples.NetCode
 			Code = (byte)OpCode.ChatMessage;
 			PlayerID = playerID;
 			Text = text;
+		}
+
+		public ChatMessage(Client client, string text)
+		{
+			Code = (byte)OpCode.ChatMessage;
+			PlayerID = client.PlayerID;
+			Text = new FixedString512(text);
 		}
 
 		public override void Serialize(ref DataStreamWriter writer)
