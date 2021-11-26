@@ -6,10 +6,8 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseHost : MonoBehaviour
+	public abstract class BaseHost : BaseNetPoint
 	{
-		[ReadOnly] public bool IsInitialized;
-
 		// TODO: Have this class find or create both components, initialize them, and handle the updates and shutdowns. Will also expose all of the public functions
 	}
 }

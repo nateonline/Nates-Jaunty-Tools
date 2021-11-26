@@ -11,43 +11,43 @@ namespace NatesJauntyTools.Examples.NetCode
 		[SerializeField] AddConnectionButton hostButton;
 		[SerializeField] AddConnectionButton clientButton;
 
-		[SerializeField] GameObject connectionPrefab;
 		[SerializeField] RectTransform connectionParent;
+		[SerializeField] GameObject serverTilePrefab;
+		[SerializeField] GameObject hostTilePrefab;
+		[SerializeField] GameObject clientTilePrefab;
 
 		List<ConnectionTile> connections = new List<ConnectionTile>();
 
 
 		public void AddConnection(string connectionType)
 		{
-			GameObject newConnectionObject = Instantiate(connectionPrefab, connectionParent);
-			ConnectionTile newConnectionTile = newConnectionObject.GetComponent<ConnectionTile>();
+			// GameObject newConnectionObject = Instantiate(connectionPrefab, connectionParent);
+			// ConnectionTile newConnectionTile = newConnectionObject.GetComponent<ConnectionTile>();
 
-			connections.Add(newConnectionTile);
-			newConnectionObject.name = connectionType;
-			newConnectionTile.title.text = connectionType;
-			newConnectionTile.ui = this;
+			// connections.Add(newConnectionTile);
+			// newConnectionObject.name = connectionType;
+			// newConnectionTile.title.text = connectionType;
+			// newConnectionTile.ui = this;
 
+
+			ConnectionTile newConnection = null;
 			switch (connectionType)
 			{
 				case "Server":
-					Server newServer = newConnectionObject.AddComponent<Server>();
-					newServer.connectionTile = newConnectionTile;
-					newConnectionTile.connection = newServer;
+					newConnection = Instantiate(serverTilePrefab, connectionParent).GetComponent<ServerTile>();
 					break;
 
 				case "Host":
-					Host newHost = newConnectionObject.AddComponent<Host>();
-					newHost.connectionTile = newConnectionTile;
-					newConnectionTile.connection = newHost;
 					break;
 
 				case "Client":
-					Client newClient = newConnectionObject.AddComponent<Client>();
-					newClient.connectionTile = newConnectionTile;
-					newConnectionTile.connection = newClient;
-					newClient.address = "localhost";
+					newConnection = Instantiate(clientTilePrefab, connectionParent).GetComponent<ClientTile>();
 					break;
 			}
+			newConnection.name = connectionType;
+			newConnection.title.text = connectionType;
+			newConnection.ui = this;
+			connections.Add(newConnection);
 
 			ValidateButtons();
 		}
@@ -61,17 +61,7 @@ namespace NatesJauntyTools.Examples.NetCode
 
 		void ValidateButtons()
 		{
-			bool serverOrHostExists = false;
-			foreach (ConnectionTile tile in connections)
-			{
-				switch (tile.connection)
-				{
-					case Server server:
-					case Host host:
-						serverOrHostExists = true;
-						break;
-				}
-			}
+			bool serverOrHostExists = connections.Any(c => c is ServerTile);
 
 			serverButton.Interactable = !serverOrHostExists;
 			hostButton.Interactable = !serverOrHostExists;

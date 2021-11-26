@@ -9,24 +9,8 @@ namespace NatesJauntyTools.Examples.NetCode
 {
 	public class Client : BaseClient
 	{
-		[Header("Networking")]
-		public string address;
-		public ushort port = 1414;
-
-		[Header("Display")]
-		public ConnectionTile connectionTile;
-
-		[Header("Info")]
-		[ReadOnly] [SerializeField] private byte playerID; public byte PlayerID => playerID;
-		[SerializeField] GameObject playerPrefab;
-
-
-		void Update() { UpdateClient(); }
-		void OnDestroy() { ShutdownClient(); }
-
-
 		[InspectorButton]
-		public void StartClient() { InitializeClient(address, port); }
+		public void StartClient() { Startup(); }
 
 
 		protected override void OnData(DataStreamReader reader)
@@ -43,20 +27,20 @@ namespace NatesJauntyTools.Examples.NetCode
 					break;
 
 				default:
-					connectionTile.Log($"Didn't understand OpCode {opCode}");
+					NetLog($"Didn't understand OpCode {opCode}");
 					break;
 			}
 		}
 
 		void ReceivePlayerID(AssignPlayerID assignPlayerID)
 		{
-			playerID = assignPlayerID.PlayerID;
-			connectionTile.Log($"Connected to {address} as ID {playerID}");
+			clientID = assignPlayerID.PlayerID;
+			NetLog($"Connected to {address} as ID {clientID}");
 		}
 
 		void ReceiveChatMessage(ChatMessage chatMessage)
 		{
-			connectionTile.Log($"[{chatMessage.PlayerID}]: {chatMessage.Text}");
+			NetLog($"[{chatMessage.PlayerID}]: {chatMessage.Text}");
 		}
 	}
 }

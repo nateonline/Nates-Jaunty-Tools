@@ -6,18 +6,21 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseClient : Script
+	public abstract class BaseClient : BaseNetPoint
 	{
-		[ReadOnly] public bool IsInitialized;
-		protected NetworkDriver driver;
 		protected NetworkConnection serverConnection;
 
+		public string address = "localhost";
+		public ushort port = 1414;
+		[ReadOnly] [SerializeField] protected byte clientID;
+		public byte ClientID => clientID;
 
-		public virtual void InitializeClient(string address, ushort port)
+
+		public override void Startup()
 		{
 			if (!IsInitialized)
 			{
-				Debug.Log("CLIENT: Initializing");
+				NetLog("CLIENT: Initializing");
 
 				driver = NetworkDriver.Create();
 				serverConnection = default(NetworkConnection);
@@ -28,31 +31,36 @@ namespace NatesJauntyTools.NetCode
 					endPoint = NetworkEndPoint.LoopbackIpv4;
 					endPoint.Port = port;
 				}
+				else if (NetworkEndPoint.TryParse(address, port, out NetworkEndPoint newEndPoint))
+				{
+					endPoint = newEndPoint;
+				}
 				else
 				{
-					endPoint = NetworkEndPoint.Parse(address, port);
+					NetLog($"CLIENT: Can't find address \"{address}\"");
+					return;
 				}
 
 				serverConnection = driver.Connect(endPoint);
 				IsInitialized = true;
 			}
-			else { Debug.LogWarning("CLIENT: Can't initialize client, it's already initialized"); }
+			else { NetLog("CLIENT: Can't initialize client, it's already initialized"); }
 		}
 
-		public virtual void ShutdownClient()
+		public override void Shutdown()
 		{
 			if (IsInitialized)
 			{
-				Debug.Log("CLIENT: Shutting down");
+				NetLog("CLIENT: Shutting down");
 
-				if (driver.IsCreated) driver.Dispose();
-				else { Debug.LogWarning("CLIENT: No driver to dispose of"); }
+				if (driver.IsCreated) { driver.Dispose(); }
+				else { NetLog("CLIENT: No driver to dispose of"); }
 			}
 
 			IsInitialized = false;
 		}
 
-		protected virtual void UpdateClient()
+		public override void Upkeep()
 		{
 			if (IsInitialized)
 			{
@@ -64,10 +72,10 @@ namespace NatesJauntyTools.NetCode
 
 		void CheckAlive()
 		{
-			if (!serverConnection.IsCreated) { Debug.Log("CLIENT: Something went wrong, lost connection to server!"); }
+			if (!serverConnection.IsCreated) { NetLog("CLIENT: Something went wrong, lost connection to server!"); }
 		}
 
-		protected void UpdateMessagePump()
+		void UpdateMessagePump()
 		{
 			DataStreamReader reader;
 
@@ -75,26 +83,33 @@ namespace NatesJauntyTools.NetCode
 			int safetyNetCounter = 1000;
 			while (safetyNetCounter > 0 && (cmd = serverConnection.PopEvent(driver, out reader)) != NetworkEvent.Type.Empty)
 			{
-				if (--safetyNetCounter == 0) { Debug.LogError("CLIENT: Hit max iterations, exiting", gameObject); return; }
+				if (--safetyNetCounter == 0)
+				{
+					NetLog("CLIENT: Hit max iterations, exiting");
+					return;
+				}
 
-				if (cmd == NetworkEvent.Type.Connect)
+				switch (cmd)
 				{
-					Debug.Log($"CLIENT: Connected to the server");
+					case NetworkEvent.Type.Connect:
+						NetLog($"CLIENT: Connected to the server");
+						break;
+
+					case NetworkEvent.Type.Disconnect:
+						NetLog("CLIENT: Disconnected from the server");
+						serverConnection = default(NetworkConnection);
+						break;
+
+					case NetworkEvent.Type.Data:
+						OnData(reader);
+						break;
+
+					default:
+						NetLog($"CLIENT: Received {cmd} from server unexpectedly");
+						break;
 				}
-				else if (cmd == NetworkEvent.Type.Data)
-				{
-					OnData(reader);
-				}
-				else if (cmd == NetworkEvent.Type.Disconnect)
-				{
-					Debug.Log("CLIENT: Disconnected from the server");
-					serverConnection = default(NetworkConnection);
-				}
-				else { Debug.Log($"CLIENT: Received {cmd} from server unexpectedly"); }
 			}
 		}
-
-		protected abstract void OnData(DataStreamReader reader);
 
 		public void SendToServer(BaseMessage message)
 		{
@@ -105,7 +120,7 @@ namespace NatesJauntyTools.NetCode
 				message.Serialize(ref writer);
 				driver.EndSend(writer);
 			}
-			else { Debug.LogWarning("CLIENT: Can't send message to server, client isn't initialized"); }
+			else { NetLog("CLIENT: Can't send message to server, client isn't initialized"); }
 		}
 	}
 }

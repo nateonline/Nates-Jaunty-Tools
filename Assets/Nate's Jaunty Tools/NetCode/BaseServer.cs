@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,18 +7,22 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseServer : Script
+	public abstract class BaseServer : BaseNetPoint
 	{
-		[ReadOnly] public bool IsInitialized;
-		protected NetworkDriver driver;
+		public event Action<NetworkConnection> OnNewConnection;
+
 		protected NativeList<NetworkConnection> clientConnections;
 
+		public int maxConnections;
+		public ushort port = 1414;
+		[ReadOnly] public byte connectionCount = 0;
 
-		public virtual void InitializeServer(int maxConnections, ushort port)
+
+		public override void Startup()
 		{
 			if (!IsInitialized)
 			{
-				Debug.Log("SERVER: Initializing");
+				NetLog("SERVER: Initializing");
 
 				// Initialize Driver
 				driver = NetworkDriver.Create();
@@ -26,7 +31,7 @@ namespace NatesJauntyTools.NetCode
 
 				if (driver.Bind(endPoint) != 0)
 				{
-					Debug.LogWarning($"SERVER: There was an error binding to port {endPoint.Port}");
+					NetLog($"SERVER: There was an error binding to port {endPoint.Port}");
 				}
 				else
 				{
@@ -39,27 +44,27 @@ namespace NatesJauntyTools.NetCode
 			}
 			else
 			{
-				Debug.LogWarning("SERVER: Can't initialize server, it's already initialized");
+				NetLog("SERVER: Can't initialize server, it's already initialized");
 			}
 		}
 
-		public virtual void ShutdownServer()
+		public override void Shutdown()
 		{
 			if (IsInitialized)
 			{
-				Debug.Log("SERVER: Shutting down");
+				NetLog("SERVER: Shutting down");
 
 				if (driver.IsCreated) { driver.Dispose(); }
-				else { Debug.LogWarning("SERVER: No driver to dispose of"); }
+				else { NetLog("SERVER: No driver to dispose of"); }
 
 				if (clientConnections.IsCreated) { clientConnections.Dispose(); }
-				else { Debug.LogWarning("SERVER: No client connections to dispose of"); }
+				else { NetLog("SERVER: No client connections to dispose of"); }
 			}
 
 			IsInitialized = false;
 		}
 
-		protected void UpdateServer()
+		public override void Upkeep()
 		{
 			if (IsInitialized)
 			{
@@ -82,23 +87,24 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		protected virtual void AcceptNewConnections()
+		void AcceptNewConnections()
 		{
-			NetworkConnection c;
+			NetworkConnection newConnection;
 			int safetyNetCounter = 100;
-			while (safetyNetCounter > 0 && (c = driver.Accept()) != default(NetworkConnection))
+			while (safetyNetCounter > 0 && (newConnection = driver.Accept()) != default(NetworkConnection))
 			{
-				if (--safetyNetCounter == 0) { Debug.LogError("SERVER: Hit max iterations, exiting", gameObject); return; }
+				if (--safetyNetCounter == 0) { NetLog("SERVER: Hit max iterations, exiting"); return; }
 
-				clientConnections.Add(c);
-				Debug.Log("SERVER: Accepted a connection");
-				OnNewConnection(c);
+				clientConnections.Add(newConnection);
+				NetLog("SERVER: Accepted a connection");
+				HandleNewConnection(newConnection);
+				OnNewConnection?.Invoke(newConnection);
 			}
 		}
 
-		protected virtual void OnNewConnection(NetworkConnection connection) { }
+		protected virtual void HandleNewConnection(NetworkConnection newConnection) { }
 
-		protected void UpdateMessagePump()
+		void UpdateMessagePump()
 		{
 			DataStreamReader reader;
 			for (int i = 0; i < clientConnections.Length; i++)
@@ -107,7 +113,7 @@ namespace NatesJauntyTools.NetCode
 				int safetyNetCounter = 1000;
 				while (safetyNetCounter > 0 && (cmd = driver.PopEventForConnection(clientConnections[i], out reader)) != NetworkEvent.Type.Empty)
 				{
-					if (--safetyNetCounter == 0) { Debug.LogError("SERVER: Hit max iterations, exiting", gameObject); return; }
+					if (--safetyNetCounter == 0) { NetLog("SERVER: Hit max iterations, exiting"); return; }
 
 					if (cmd == NetworkEvent.Type.Data)
 					{
@@ -115,15 +121,13 @@ namespace NatesJauntyTools.NetCode
 					}
 					else if (cmd == NetworkEvent.Type.Disconnect)
 					{
-						Debug.Log("SERVER: Client has disconnected from the server");
+						NetLog("SERVER: Client has disconnected from the server");
 						clientConnections[i] = default(NetworkConnection);
 					}
-					else { Debug.Log($"SERVER: Received {cmd} from client unexpectedly"); }
+					else { NetLog($"SERVER: Received {cmd} from client unexpectedly"); }
 				}
 			}
 		}
-
-		protected abstract void OnData(DataStreamReader reader);
 
 		public void SendToClient(NetworkConnection clientConnection, BaseMessage message)
 		{
@@ -134,7 +138,7 @@ namespace NatesJauntyTools.NetCode
 				message.Serialize(ref writer);
 				driver.EndSend(writer);
 			}
-			else { Debug.LogWarning("SERVER: Can't send message to client, server isn't initialized"); }
+			else { NetLog("SERVER: Can't send message to client, server isn't initialized"); }
 		}
 
 		public void SendToAllClients(BaseMessage message)
@@ -146,7 +150,7 @@ namespace NatesJauntyTools.NetCode
 					if (client.IsCreated) { SendToClient(client, message); }
 				}
 			}
-			else { Debug.LogWarning("SERVER: Can't send message to all clients, server isn't initialized"); }
+			else { NetLog("SERVER: Can't send message to all clients, server isn't initialized"); }
 		}
 	}
 }
