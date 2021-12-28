@@ -26,14 +26,14 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2021.10.11";
+			versionNumber = "2021.12.28";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Added, "Added GetChildren extention method to Transforms.cs"),
-				new ChangeLogItem(ChangeType.Added, "Added GetComponentInChildrenOnly extention method to Transforms.cs"),
-				new ChangeLogItem(ChangeType.Added, "Added GetComponentsInChildrenOnly extention method to Transforms.cs"),
+				new ChangeLogItem(ChangeType.Added, "Added a few missing extension methods"),
+				new ChangeLogItem(ChangeType.Modified, "Changed the syntax for some extension methods to use big-arrow return"),
+				new ChangeLogItem(ChangeType.Added, "Added model (not tested)"),
 			};
 		}
 	}

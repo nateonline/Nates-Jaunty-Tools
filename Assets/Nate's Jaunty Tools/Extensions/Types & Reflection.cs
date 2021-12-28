@@ -9,8 +9,8 @@ namespace NatesJauntyTools
 {
 	public static partial class Tools
 	{
-		/// <summary> Uses binary serialization to deeply copy the object </summary>
-		public static T DeepCopy_Binary<T>(this T original)
+		/// <summary> Returns a deep copy of the object, copied via binary serialization (Requires all contained types to be Serializable) </summary>
+		public static T DeepCopy<T>(this T original)
 		{
 			using (var ms = new MemoryStream())
 			{
@@ -20,16 +20,6 @@ namespace NatesJauntyTools
 
 				return (T)formatter.Deserialize(ms);
 			}
-		}
-
-		/// <summary> Uses reflection to deeply copy all the fields of the object </summary>
-		public static T DeepCopy<T>(this T original) where T : new()
-		{
-			return typeof(T).GetFields().Aggregate(new T(), (newCopy, field) =>
-			{
-				field.SetValue(newCopy, field.GetValue(original));
-				return newCopy;
-			});
 		}
 
 		public static Dictionary<string, string> GetFields(this object subject)
