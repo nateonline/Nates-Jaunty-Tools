@@ -5,5 +5,6 @@ namespace NatesJauntyTools.Examples.NetCode
 		KeepAlive = 0,
 		AssignPlayerID = 1,
 		ChatMessage = 2,
+		PlayerPosition = 3,
 	}
 }
