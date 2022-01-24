@@ -28,10 +28,13 @@ namespace NatesJauntyTools
 			}
 		}
 
-		public static string RandomString_Secure(int length, string characterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+
+		public static string RandomString_Secure(int length, CharacterSet characterSet = CharacterSet.AlphaNumeric_All) => RandomString_Secure(length, characterSet.GetCharacters());
+
+		public static string RandomString_Secure(int length, string characterSet)
 		{
 			var stringChars = new char[length];
-			
+
 			for (int i = 0; i < stringChars.Length; i++)
 			{
 				stringChars[i] = characterSet[RandomInRange_Secure(0, characterSet.Length)];

@@ -6,13 +6,10 @@ namespace NatesJauntyTools
 	{
 		/// <summary> Use in URP to get a material's color, instead of using material.color. </summary>
 		/// <remarks> In Universal Render Pipeline, the material.color property doesn't work. This is an issue in default URP shaders that don't properly set the _Color shader property. </remarks>
-		public static Color32 ColorURP(this Material material)
-		{
-			return material.GetColor("_BaseColor");
-		}
+		public static Color32 ColorURP(this Material material) => material.GetColor("_BaseColor");
 
 		/// <summary> Get the hex code (uppercase with leading #) from a color. </summary>
-		public static string ToHex(this Color color) { return ((Color32)color).ToHex(); }
+		public static string ToHex(this Color color) => ((Color32)color).ToHex();
 
 		/// <summary> Get the hex code (uppercase with leading #) from a color. </summary>
 		public static string ToHex(this Color32 color)
@@ -46,16 +43,10 @@ namespace NatesJauntyTools
 		}
 
 		/// <summary> Get the hex code (with leading #) from a material. This won't work in URP. </summary>
-		public static string ToHex(this Material material)
-		{
-			return ToHex(material.color);
-		}
+		public static string ToHex(this Material material) => ToHex(material.color);
 
 		/// <summary> Get the hex code (with leading #) from a material. Use this instead of material.color in URP. </summary>
-		public static string ToHexURP(this Material material)
-		{
-			return ToHex(material.ColorURP());
-		}
+		public static string ToHexURP(this Material material) => ToHex(material.ColorURP());
 
 		/// <summary> Convert a string representing a hex code into a color. The leading # is optional. </summary>
 		/// <remarks> Supports string lengths of 1,2,3,4,6,8 not including the leading #. </remarks>
@@ -210,47 +201,24 @@ namespace NatesJauntyTools
 			return Color.HSVToRGB(h, s, v);
 		}
 
-		public static Color32 RandomColor(bool randomAlpha = false)
-		{
-			if (randomAlpha)
-			{
-				return new Color32(
-					(byte)UnityEngine.Random.Range(0, 256),
-					(byte)UnityEngine.Random.Range(0, 256),
-					(byte)UnityEngine.Random.Range(0, 256),
-					(byte)UnityEngine.Random.Range(0, 256)
-				);
-			}
-			else
-			{
-				return new Color32(
-					(byte)UnityEngine.Random.Range(0, 256),
-					(byte)UnityEngine.Random.Range(0, 256),
-					(byte)UnityEngine.Random.Range(0, 256),
-					255
-				);
-			}
-		}
+		public static Color32 RandomColor(bool randomAlpha = false) => new Color32(
+			(byte)UnityEngine.Random.Range(0, 256),
+			(byte)UnityEngine.Random.Range(0, 256),
+			(byte)UnityEngine.Random.Range(0, 256),
+			(byte)(randomAlpha ? UnityEngine.Random.Range(0, 256) : 255)
+		);
 
-		public static float GrayscaleValue(this Color32 color)
-		{
-			return Mathf.Sqrt(
+		public static float GrayscaleValue(this Color32 color) => Mathf.Sqrt(
 				Mathf.Pow(color.r, 2) * 0.299f +
 				Mathf.Pow(color.g, 2) * 0.587f +
 				Mathf.Pow(color.b, 2) * 0.114f);
-		}
 
 		public static Color32 PreferredTextColor(this Color32 backgroundColor, float midpoint = 0.5f)
 		{
-			float luminosity = Mathf.Sqrt(
-				Mathf.Pow(backgroundColor.r, 2) * 0.299f +
-				Mathf.Pow(backgroundColor.g, 2) * 0.587f +
-				Mathf.Pow(backgroundColor.b, 2) * 0.114f);
-
-			return (luminosity < 255f * Mathf.Pow(midpoint, 1f / 2.2f)) ? Color.white : Color.black;
+			return backgroundColor.PreferredTextColor(Color.white, Color.black, midpoint);
 		}
 
-		public static Color32 PreferredTextColor(this Color32 backgroundColor, Color32 darkTextColor, Color32 lightTextColor, float midpoint = 0.5f)
+		public static Color32 PreferredTextColor(this Color32 backgroundColor, Color32 lightTextColor, Color32 darkTextColor, float midpoint = 0.5f)
 		{
 			float luminosity = Mathf.Sqrt(
 				Mathf.Pow(backgroundColor.r, 2) * 0.299f +

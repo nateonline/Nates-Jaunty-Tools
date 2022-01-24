@@ -8,7 +8,7 @@ namespace NatesJauntyTools
 {
 	public static partial class Tools
 	{
-		/// <summary> Randomizes the order of items in a list. </summary>
+		/// <summary> Randomizes the order of items in the list </summary>
 		public static void Shuffle<T>(this IList<T> list, bool increasedRandomness = false)
 		{
 			if (increasedRandomness)
@@ -44,13 +44,13 @@ namespace NatesJauntyTools
 			}
 		}
 
-		/// <summary> Gets a random element from a list. </summary>
+		/// <summary> Gets a random element from the list </summary>
 		public static T RandomItem<T>(this IEnumerable<T> list)
 		{
 			return (T)list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
 		}
 
-		/// <summary> Debug logs each item in a list. </summary>
+		/// <summary> Runs Debug.Log on each item in the list </summary>
 		/// <param name="multiLine"> Controls if the output should display on multiple lines </param>
 		public static void LogEach<T>(this IList<T> list, string headerMessage = "", bool multiLine = false)
 		{
@@ -81,8 +81,25 @@ namespace NatesJauntyTools
 			}
 		}
 
+		/// <summary> Returns the last index of the list </summary>
 		public static int LastIndex<T>(this IList<T> list) { return list.Count - 1; }
 
+		/// <summary> Returns the last item in the list </summary>
 		public static T LastItem<T>(this IList<T> list) { return list[list.LastIndex()]; }
+
+		/// <summary> Uses ToString to order the elements, then joins them together with a delimiter </summary>
+		public static string SortAndStringify<T>(this IEnumerable<T> list, string delimiter = ", ") => string.Join(delimiter, list.OrderBy(i => i.ToString()));
+
+		/// <summary> Checks if two lists have the same elements, regardless of order </summary>
+		public static bool Matches<T>(this IEnumerable<T> list1, IEnumerable<T> list2) => list1.Except(list2).Count() + list2.Except(list1).Count() == 0;
+
+		/// <summary> Gets the item in the list by wrapping the index. Allows negative index. </summary>
+		/// <remarks> Ex: In a list with numbers 1 through 5, AtWrap(0) = 1, AtWrap(5) = 1, AtWrap(-1) = 5 </remarks>
+		public static T AtWrap<T>(this IList<T> list, int index)
+		{
+			int moddedIndex = index % list.Count;
+			int resultIndex = (moddedIndex >= 0) ? moddedIndex : list.Count - Math.Abs(moddedIndex);
+			return list[resultIndex];
+		}
 	}
 }

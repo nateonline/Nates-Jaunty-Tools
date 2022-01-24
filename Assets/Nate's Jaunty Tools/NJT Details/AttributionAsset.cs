@@ -5,8 +5,8 @@ using UnityEngine;
 namespace NatesJauntyTools.Details
 {
 	// https://wiki.creativecommons.org/wiki/best_practices_for_attribution
-	
-	
+
+
 	// Used for creating the asset if it's ever deleted
 	// [CreateAssetMenu(menuName = "Nate's Jaunty Tools/Editor Details/Attribution", fileName = "Attribution")] 
 	public class AttributionAsset : ScriptableObject
@@ -17,27 +17,36 @@ namespace NatesJauntyTools.Details
 		{
 			attributionItems = new List<AttributionItem>()
 			{
-				new AttributionItem(
-					"Inconsolata Font", 
-					"",
-					"https://github.com/googlefonts/Inconsolata",
-					"Google Fonts", "https://fonts.google.com/attribution",
-					"OFL 1.1", "https://github.com/googlefonts/Inconsolata/blob/main/OFL.txt"
-				),
-				new AttributionItem(
-					"Google Sheets Logo", 
-					"",
-					"https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg",
-					"Google", "https://www.google.com/sheets/about/",
-					"None", "https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg"
-				),
-				new AttributionItem(
-					"Font Awesome Icons", 
-					"Original and modified icons from the free tier of Font Awesome",
-					"https://fontawesome.com/",
-					"Font Awesome", "https://fontawesome.com/license",
-					"CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/"
-				)
+				new AttributionItem()
+				{
+					name = "Inconsolata Font",
+					description = "",
+					sourceURL = "https://github.com/googlefonts/Inconsolata",
+					authorName = "Google Fonts",
+					authorURL = "https://fonts.google.com/attribution",
+					licenseName = "OFL 1.1",
+					licenseURL = "https://github.com/googlefonts/Inconsolata/blob/main/OFL.txt"
+				},
+				new AttributionItem()
+				{
+					name = "Google Sheets Logo",
+					description = "",
+					sourceURL = "https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg",
+					authorName = "Google",
+					authorURL = "https://www.google.com/sheets/about/",
+					licenseName = "None",
+					licenseURL = "https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg"
+				},
+				new AttributionItem()
+				{
+					name = "Font Awesome Icons",
+					description = "Original and modified icons from the free tier of Font Awesome",
+					sourceURL = "https://fontawesome.com/",
+					authorName = "Font Awesome",
+					authorURL = "https://fontawesome.com/license",
+					licenseName = "CC BY 4.0",
+					licenseURL = "https://creativecommons.org/licenses/by/4.0/"
+				}
 			};
 		}
 	}
@@ -54,17 +63,5 @@ namespace NatesJauntyTools.Details
 		public string authorURL;
 		public string licenseName;
 		public string licenseURL;
-
-		public AttributionItem(string name, string description, string sourceURL, string authorName, string authorURL, string licenseName, string licenseURL)
-		{
-			this.name = name;
-			this.description = description;
-
-			this.sourceURL = sourceURL;
-			this.authorName = authorName;
-			this.authorURL = authorURL;
-			this.licenseName = licenseName;
-			this.licenseURL = licenseURL;
-		}
 	}
 }

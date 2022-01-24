@@ -133,38 +133,31 @@ namespace NatesJauntyTools
 			return input;
 		}
 
-		public static bool IsNumber(this string input)
-		{
-			// TODO: Need to add negative handling
+		public static bool IsNumber(this string input) => Regex.IsMatch(input, @"/^[-+]?\d+$/");
 
-			for (int i = 0; i < input.Length; i++)
-			{
-				if ((input[i] < '0' || input[i] > '9') && input[i] != '.')
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		public static bool IsInteger(this string input)
-		{
-			// TODO: Need to add negative handling
-
-			for (int i = 0; i < input.Length; i++)
-			{
-				if ((input[i] < '0' || input[i] > '9'))
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
+		public static bool IsInteger(this string input) => Regex.IsMatch(input, @"^[-+]?[0-9]\d*(\.\d+)?$");
 
 		public static bool RepresentsTrue(this string arg) { return (arg.ToLower() == "t" || arg.ToLower() == "true" || arg.ToLower() == "y" || arg.ToLower() == "yes"); }
 
 		public static bool RepresentsFalse(this string arg) { return (arg.ToLower() == "f" || arg.ToLower() == "false" || arg.ToLower() == "n" || arg.ToLower() == "no"); }
+
+
+		public enum CharacterSet { AlphaNumeric_All, AlphaNumeric_Upper, AlphaNumeric_Lower, Alpha_All, Alpha_Upper, Alpha_Lower, Numeric }
+
+		public static string GetCharacters(this CharacterSet characterSet)
+		{
+			switch (characterSet)
+			{
+				case CharacterSet.AlphaNumeric_All: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+				case CharacterSet.AlphaNumeric_Upper: return "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+				case CharacterSet.AlphaNumeric_Lower: return "abcdefghijklmnopqrstuvwxyz0123456789";
+				case CharacterSet.Alpha_All: return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+				case CharacterSet.Alpha_Upper: return "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				case CharacterSet.Alpha_Lower: return "abcdefghijklmnopqrstuvwxyz";
+				case CharacterSet.Numeric: return "0123456789";
+
+				default: throw new NotImplementedException($"CharacterSet {characterSet} doesn't have a defined set of characters!");
+			}
+		}
 	}
 }
