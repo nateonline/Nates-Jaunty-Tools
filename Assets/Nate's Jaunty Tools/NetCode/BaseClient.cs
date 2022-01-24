@@ -6,7 +6,7 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class BaseClient : NetPoint
+	public abstract class BaseClient : NetEndpoint
 	{
 		protected NetworkConnection serverConnection;
 
@@ -109,7 +109,7 @@ namespace NatesJauntyTools.NetCode
 			}
 		}
 
-		public void SendToServer(NetMessage message)
+		public void SendToServer(NetMsg message)
 		{
 			if (IsInitialized)
 			{

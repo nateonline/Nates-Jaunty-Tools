@@ -4,7 +4,7 @@ using Unity.Collections;
 
 namespace NatesJauntyTools.NetCode
 {
-	public abstract class NetMessage
+	public abstract class NetMsg
 	{
 		public byte Code { get; set; }
 

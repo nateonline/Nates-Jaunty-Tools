@@ -7,7 +7,7 @@ using NatesJauntyTools.NetCode;
 
 namespace NatesJauntyTools.Examples.NetCode
 {
-	public class PlayerPosition : NetMessage
+	public class PlayerPosition : NetMsg
 	{
 		public byte PlayerID { get; set; }
 		public float X { get; set; }
