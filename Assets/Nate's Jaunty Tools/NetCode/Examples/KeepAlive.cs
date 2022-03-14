@@ -7,7 +7,7 @@ using NatesJauntyTools.NetCode;
 
 namespace NatesJauntyTools.Examples.NetCode
 {
-	public class KeepAlive : NetMessage
+	public class KeepAlive : NetMsg
 	{
 		public KeepAlive()
 		{

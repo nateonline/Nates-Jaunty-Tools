@@ -16,6 +16,7 @@ namespace NatesJauntyTools.GoogleSheets
 
 		string[] Scopes = { SheetsService.Scope.Spreadsheets };
 		SheetsService service;
+		public bool IsInitialized => service != null;
 
 		[Tooltip("Copied from the URL bar when viewing the google sheet (in between the '/d/' and '/edit')")]
 		[SerializeField] string spreadsheetID = "";
