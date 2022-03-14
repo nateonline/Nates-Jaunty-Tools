@@ -26,14 +26,13 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2021.12.28";
+			versionNumber = "2022.03.14";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Added, "Added a few missing extension methods"),
-				new ChangeLogItem(ChangeType.Modified, "Changed the syntax for some extension methods to use big-arrow return"),
-				new ChangeLogItem(ChangeType.Added, "Added model (not tested)"),
+				new ChangeLogItem(ChangeType.Added, "Added the button prompts sprite pack from \"Those Awesome Guys\""),
+				new ChangeLogItem(ChangeType.Added, "Added the flexible grid and circle layout groups"),
 			};
 		}
 	}

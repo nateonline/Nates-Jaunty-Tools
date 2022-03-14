@@ -46,6 +46,16 @@ namespace NatesJauntyTools.Details
 					authorURL = "https://fontawesome.com/license",
 					licenseName = "CC BY 4.0",
 					licenseURL = "https://creativecommons.org/licenses/by/4.0/"
+				},
+				new AttributionItem()
+				{
+					name = "Controller & Keyboard Prompts",
+					description = "",
+					sourceURL = "https://thoseawesomeguys.com/prompts/",
+					authorName = "Those Awesome Guys",
+					authorURL = "https://thoseawesomeguys.com/",
+					licenseName = "Creative Commons 0 (CC0)",
+					licenseURL = "https://creativecommons.org/share-your-work/public-domain/cc0/"
 				}
 			};
 		}
