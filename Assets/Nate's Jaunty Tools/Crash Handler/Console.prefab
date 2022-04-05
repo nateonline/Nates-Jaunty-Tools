@@ -744,7 +744,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 511135382467900086}
   m_HandleRect: {fileID: 511135382467900087}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1130,7 +1130,7 @@ GameObject:
   - component: {fileID: 3766135190867581994}
   - component: {fileID: 3766135190867581995}
   m_Layer: 5
-  m_Name: Crash Handler & Console
+  m_Name: Console
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1169,7 +1169,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74d61e39e5ffd414bbf3bd25d254aa68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  window: {fileID: 4351062907974333387}
+  crashHandler: {fileID: 5758466644936930777}
+  crashScrollView: {fileID: 511135382834241202}
+  maxCrashes: 10
+  crashPrefab: {fileID: 4609917861584669299, guid: 29eeee3876a9e714796c1413361f33aa, type: 3}
+  crashParent: {fileID: 511135382487037259}
+  copyButton: {fileID: 3608594649610591054}
+  consoleWindow: {fileID: 4351062907974333387}
   scrollRect: {fileID: 8427768855480989935}
   logsText: {fileID: 4910455107905725810}
   commandField: {fileID: 4403357863671715526}
@@ -1196,12 +1202,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3839bf2c78da23438017fb761782ee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 5758466644936930777}
-  scrollView: {fileID: 511135382834241202}
-  maxCrashes: 10
-  crashPrefab: {fileID: 4609917861584669299, guid: 29eeee3876a9e714796c1413361f33aa, type: 3}
-  crashParent: {fileID: 511135382487037259}
-  copyButton: {fileID: 3608594649610591054}
 --- !u!223 &3766135190867581993
 Canvas:
   m_ObjectHideFlags: 0
@@ -3440,7 +3440,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1012138598521559287, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_text
-      value: Exit
+      value: Quit
       objectReference: {fileID: 0}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -3453,7 +3453,7 @@ PrefabInstance:
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 711410365861372539}
+      objectReference: {fileID: 6152348725712917313}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -3464,7 +3464,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CrashHandler, Assembly-CSharp
+      value: NatesJauntyTools.Console, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -3572,7 +3572,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6709797610442737317, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_Name
-      value: Exit
+      value: Quit
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
@@ -3603,7 +3603,7 @@ PrefabInstance:
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 711410365861372539}
+      objectReference: {fileID: 6152348725712917313}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -3614,7 +3614,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CrashHandler, Assembly-CSharp
+      value: NatesJauntyTools.Console, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1756904676992193155, guid: 8a12f1d214e6c014b981101155a4ed44, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

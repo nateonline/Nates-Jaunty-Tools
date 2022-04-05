@@ -15,19 +15,34 @@ namespace NatesJauntyTools
 		public enum LogType { Info, Debug, Network, Database, Warning, Error, Exception, Assert }
 
 
-		static List<Log> logs = new List<Log>();
-		static List<string> commandHistory = new List<string>();
-		static int commandHistoryIndex = -1;
-		static List<Command> commands = new List<Command>();
+		#region Fields & Properties
 
-		[Header("Scene Refs")]
-		public GameObject window;
+		[Header("Key Binding")]
+		public List<KeyBinding> keyBindings = new List<KeyBinding>();
+
+		[Header("Crash Handler")]
+		[SerializeField] GameObject crashHandler;
+		[SerializeField] RectTransform crashScrollView;
+		[SerializeField] int maxCrashes = 10;
+		[SerializeField] GameObject crashPrefab;
+		[SerializeField] Transform crashParent;
+		List<Crash> crashes = new List<Crash>();
+
+		[SerializeField] SmartButton copyButton;
+
+		const int CLIPBOARD_SEPARATOR_LENGTH = 25;
+		const char CLIPBOARD_SEPARATOR_CHAR = '—';
+
+		[Header("Logs")]
+		public GameObject consoleWindow;
 		public ScrollRect scrollRect;
 		public TMP_Text logsText;
 		public TMP_InputField commandField;
 
-		[Header("Key Binding")]
-		public List<KeyBinding> keyBindings = new List<KeyBinding>();
+		static List<Log> logs = new List<Log>();
+		static List<string> commandHistory = new List<string>();
+		static int commandHistoryIndex = -1;
+		static List<Command> commands = new List<Command>();
 
 		[Header("Log Settings")]
 		[SerializeField] Toggle logTimestampNone;
@@ -52,11 +67,16 @@ namespace NatesJauntyTools
 		[SerializeField] Transform logFilterParent;
 		[SerializeField] List<LogType> includedLogTypes = new List<LogType>();
 
+		#endregion
+
 
 		#region Mono
 
 		protected override void PostInitialize()
 		{
+			Application.logMessageReceived += OnLogReceived;
+			crashHandler.SetActive(false);
+
 			CloseWindow();
 			logsText.text = "";
 			CreateCommands();
@@ -70,12 +90,7 @@ namespace NatesJauntyTools
 			NavigateCommandHistory();
 		}
 
-		private void OnEnable()
-		{
-			Application.logMessageReceived += OnLogReceived;
-		}
-
-		private void OnDisable()
+		void OnDestroy()
 		{
 			Application.logMessageReceived -= OnLogReceived;
 		}
@@ -83,82 +98,11 @@ namespace NatesJauntyTools
 		#endregion
 
 
+		[InspectorButton]
+		public void TestCrash() => Debug.LogError("Testing Crash Handler");
+
+
 		#region Setup & Maintenance
-
-		bool AnyKeyBindingTriggered()
-		{
-			bool atLeastOneBindingWasTriggered = false;
-
-			foreach (var binding in keyBindings)
-			{
-				if (binding.TriggeredThisFrame()) atLeastOneBindingWasTriggered = true;
-			}
-
-			return atLeastOneBindingWasTriggered;
-		}
-
-		void NavigateCommandHistory()
-		{
-			if (commandField.isFocused)
-			{
-				if (Input.GetKeyDown(KeyCode.UpArrow) && commandHistoryIndex < commandHistory.Count - 1)
-				{
-					DisplayCommandHistory(++commandHistoryIndex);
-				}
-
-				if (Input.GetKeyDown(KeyCode.DownArrow) && commandHistoryIndex > -1)
-				{
-					DisplayCommandHistory(--commandHistoryIndex);
-				}
-			}
-		}
-
-		void DisplayCommandHistory(int index)
-		{
-			if (index <= -1)
-			{
-				commandField.text = "";
-			}
-			else
-			{
-				commandField.text = commandHistory[index];
-				commandField.caretPosition = commandField.text.Length;
-			}
-		}
-
-		void OpenWindow()
-		{
-			window.SetActive(true);
-			ResetCommandField();
-		}
-
-		void CloseWindow()
-		{
-			window.SetActive(false);
-		}
-
-		void ToggleWindow()
-		{
-			if (window.activeSelf) CloseWindow();
-			else OpenWindow();
-		}
-
-		void ResetCommandField()
-		{
-			commandField.text = "";
-			commandField.ActivateInputField();
-			commandField.Select();
-			commandHistoryIndex = -1;
-		}
-
-		IEnumerator ForceScrollToBottom()
-		{
-			// Wait for end of frame AND force update all canvases before setting to bottom.
-			yield return new WaitForEndOfFrame();
-			Canvas.ForceUpdateCanvases();
-			scrollRect.verticalNormalizedPosition = 0f;
-			Canvas.ForceUpdateCanvases();
-		}
 
 		void PopulateLogFilters()
 		{
@@ -179,6 +123,134 @@ namespace NatesJauntyTools
 
 				RefreshLogDisplay();
 			}
+		}
+
+		bool AnyKeyBindingTriggered()
+		{
+			bool atLeastOneBindingWasTriggered = false;
+
+			foreach (var binding in keyBindings)
+			{
+				if (binding.TriggeredThisFrame()) atLeastOneBindingWasTriggered = true;
+			}
+
+			return atLeastOneBindingWasTriggered;
+		}
+
+		void OpenWindow()
+		{
+			consoleWindow.SetActive(true);
+			ResetCommandField();
+		}
+
+		void CloseWindow()
+		{
+			consoleWindow.SetActive(false);
+		}
+
+		void ToggleWindow()
+		{
+			if (consoleWindow.activeSelf) CloseWindow();
+			else OpenWindow();
+		}
+
+		IEnumerator ForceScrollToBottom()
+		{
+			// Wait for end of frame AND force update all canvases before setting to bottom.
+			yield return new WaitForEndOfFrame();
+			Canvas.ForceUpdateCanvases();
+			scrollRect.verticalNormalizedPosition = 0f;
+			Canvas.ForceUpdateCanvases();
+		}
+
+		public void CopyErrorsToClipboard()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+
+			foreach (Crash crash in crashes)
+			{
+				stringBuilder.Append(crash.message.text);
+				stringBuilder.Append("\n\n");
+				stringBuilder.Append(crash.stackTrace.text);
+				stringBuilder.Append("\n");
+
+				for (int i = 0; i < CLIPBOARD_SEPARATOR_LENGTH; i++) { stringBuilder.Append(CLIPBOARD_SEPARATOR_CHAR); }
+			}
+
+			Runtime.CopyToClipboard(stringBuilder.ToString());
+
+			copyButton.Text = "Text Copied!";
+			copyButton.Interactable = false;
+		}
+
+		public void Quit() => Runtime.Quit();
+
+		#endregion
+
+
+		#region Logging
+
+		public static void Log(string message, Console.LogType type = Console.LogType.Info)
+		{
+			logs.Add(new Log(message, type));
+			_.StartCoroutine(_.ForceScrollToBottom());
+			_.RefreshLogDisplay();
+		}
+
+		void OnLogReceived(string message, string stackTrace, UnityEngine.LogType unityLogType)
+		{
+			Console.LogType consoleLogType = unityLogType switch
+			{
+				UnityEngine.LogType.Log => Console.LogType.Info,
+				UnityEngine.LogType.Assert => Console.LogType.Assert,
+				UnityEngine.LogType.Warning => Console.LogType.Warning,
+				UnityEngine.LogType.Error => Console.LogType.Error,
+				UnityEngine.LogType.Exception => Console.LogType.Exception,
+
+				_ => Console.LogType.Info
+			};
+
+			switch (unityLogType)
+			{
+				case UnityEngine.LogType.Error:
+				case UnityEngine.LogType.Exception:
+				case UnityEngine.LogType.Assert:
+					crashHandler.SetActive(true);
+					if (crashes.Count < maxCrashes)
+					{
+						Crash newCrash = Instantiate(crashPrefab, crashParent).GetComponent<Crash>();
+						newCrash.SetData(message, stackTrace);
+						crashes.Add(newCrash);
+						LayoutRebuilder.ForceRebuildLayoutImmediate(crashScrollView.GetComponent<RectTransform>());
+					}
+					break;
+			}
+
+			logs.Add(new Log(message, consoleLogType));
+			StartCoroutine(ForceScrollToBottom());
+			RefreshLogDisplay();
+		}
+
+		public void RefreshLogDisplay()
+		{
+			StringBuilder totalOutput = new StringBuilder();
+			foreach (Log log in logs)
+			{
+				if (!includedLogTypes.Contains(log.type)) continue; // Skip this log
+
+				totalOutput.Append("\n" + log.GetText(CurrentTimestampMode));
+			}
+
+			logsText.text = totalOutput.ToString();
+			Vector2 size = logsText.rectTransform.sizeDelta;
+			size.y = logsText.preferredHeight;
+			logsText.rectTransform.sizeDelta = size;
+		}
+
+		public void ClearLogs()
+		{
+			logs.Clear();
+			RefreshLogDisplay();
 		}
 
 		#endregion
@@ -211,6 +283,43 @@ namespace NatesJauntyTools
 					}
 				)
 			};
+		}
+
+		void NavigateCommandHistory()
+		{
+			if (commandField.isFocused)
+			{
+				if (Input.GetKeyDown(KeyCode.UpArrow) && commandHistoryIndex < commandHistory.Count - 1)
+				{
+					DisplayCommandHistory(++commandHistoryIndex);
+				}
+
+				if (Input.GetKeyDown(KeyCode.DownArrow) && commandHistoryIndex > -1)
+				{
+					DisplayCommandHistory(--commandHistoryIndex);
+				}
+			}
+		}
+
+		void DisplayCommandHistory(int index)
+		{
+			if (index <= -1)
+			{
+				commandField.text = "";
+			}
+			else
+			{
+				commandField.text = commandHistory[index];
+				commandField.caretPosition = commandField.text.Length;
+			}
+		}
+
+		void ResetCommandField()
+		{
+			commandField.text = "";
+			commandField.ActivateInputField();
+			commandField.Select();
+			commandHistoryIndex = -1;
 		}
 
 		// Make sure this is called on the End Edit of the command field
@@ -248,58 +357,6 @@ namespace NatesJauntyTools
 			string output = "Listing available commands:";
 			foreach (Command command in commands) { output += "\n\t- " + command.HelpText; }
 			Debug.Log(output);
-		}
-
-		#endregion
-
-
-		#region Logging
-
-		public static void Log(string message, Console.LogType type = Console.LogType.Info)
-		{
-			logs.Add(new Log(message, type));
-			_.StartCoroutine(_.ForceScrollToBottom());
-			_.RefreshLogDisplay();
-		}
-
-		void OnLogReceived(string message, string stackTrace, UnityEngine.LogType unityLogType)
-		{
-			Console.LogType consoleLogType = unityLogType switch
-			{
-				UnityEngine.LogType.Log => Console.LogType.Info,
-				UnityEngine.LogType.Assert => Console.LogType.Assert,
-				UnityEngine.LogType.Warning => Console.LogType.Warning,
-				UnityEngine.LogType.Error => Console.LogType.Error,
-				UnityEngine.LogType.Exception => Console.LogType.Exception,
-
-				_ => Console.LogType.Info
-			};
-
-			logs.Add(new Log(message, consoleLogType));
-			StartCoroutine(ForceScrollToBottom());
-			RefreshLogDisplay();
-		}
-
-		public void RefreshLogDisplay()
-		{
-			StringBuilder totalOutput = new StringBuilder();
-			foreach (Log log in logs)
-			{
-				if (!includedLogTypes.Contains(log.type)) continue; // Skip this log
-
-				totalOutput.Append("\n" + log.GetText(CurrentTimestampMode));
-			}
-
-			logsText.text = totalOutput.ToString();
-			Vector2 size = logsText.rectTransform.sizeDelta;
-			size.y = logsText.preferredHeight;
-			logsText.rectTransform.sizeDelta = size;
-		}
-
-		public void ClearLogs()
-		{
-			logs.Clear();
-			RefreshLogDisplay();
 		}
 
 		#endregion
