@@ -32,6 +32,7 @@ namespace NatesJauntyTools
 			this.logType = logType;
 			IsOn = true;
 			Text = logType.ToString();
+			name = Text;
 		}
 	}
 }

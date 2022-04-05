@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,15 +51,6 @@ namespace NatesJauntyTools
 		[SerializeField] GameObject logFilterPrefab;
 		[SerializeField] Transform logFilterParent;
 		[SerializeField] List<LogType> includedLogTypes = new List<LogType>();
-
-		[SerializeField] Toggle includeInfoLogs;
-		[SerializeField] Toggle includeDebugLogs;
-		[SerializeField] Toggle includeNetworkLogs;
-		[SerializeField] Toggle includeDatabaseLogs;
-		[SerializeField] Toggle includeWarningLogs;
-		[SerializeField] Toggle includeErrorLogs;
-		[SerializeField] Toggle includeAssertLogs;
-		[SerializeField] Toggle includeExceptionLogs;
 
 
 		#region Mono
@@ -290,28 +282,15 @@ namespace NatesJauntyTools
 
 		public void RefreshLogDisplay()
 		{
-			string totalOutput = "";
+			StringBuilder totalOutput = new StringBuilder();
 			foreach (Log log in logs)
 			{
 				if (!includedLogTypes.Contains(log.type)) continue; // Skip this log
 
-				// switch (log.type)
-				// {
-				// 	case Console.LogType.Info: if (!includeInfoLogs.isOn) continue; else break;
-				// 	case Console.LogType.Debug: if (!includeDebugLogs.isOn) continue; else break;
-				// 	case Console.LogType.Network: if (!includeNetworkLogs.isOn) continue; else break;
-				// 	case Console.LogType.Database: if (!includeDatabaseLogs.isOn) continue; else break;
-				// 	case Console.LogType.Assert: if (!includeAssertLogs.isOn) continue; else break;
-				// 	case Console.LogType.Warning: if (!includeWarningLogs.isOn) continue; else break;
-				// 	case Console.LogType.Error: if (!includeErrorLogs.isOn) continue; else break;
-				// 	case Console.LogType.Exception: if (!includeExceptionLogs.isOn) continue; else break;
-				// 	default: continue;
-				// }
-
-				totalOutput += "\n" + log.GetText(CurrentTimestampMode);
+				totalOutput.Append("\n" + log.GetText(CurrentTimestampMode));
 			}
 
-			logsText.text = totalOutput;
+			logsText.text = totalOutput.ToString();
 			Vector2 size = logsText.rectTransform.sizeDelta;
 			size.y = logsText.preferredHeight;
 			logsText.rectTransform.sizeDelta = size;

@@ -32,4 +32,6 @@ public class SmartButton : Script
 		get => button.interactable;
 		set => button.interactable = value;
 	}
+
+	public Button.ButtonClickedEvent OnClick => button.onClick;
 }
