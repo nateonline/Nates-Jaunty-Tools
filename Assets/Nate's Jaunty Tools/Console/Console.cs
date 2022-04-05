@@ -8,11 +8,12 @@ using TMPro;
 
 namespace NatesJauntyTools
 {
-	public enum ConsoleTimestampMode { None, RunTime, RealTime, DateTime, DateTimeZone }
-	public enum ConsoleLogType { Info, Debug, Network, Database, Assert, Warning, Error, Exception }
-
 	public class Console : Singleton<Console>
 	{
+		public enum TimestampMode { None, RunTime, RealTime, DateTime, DateTimeZone }
+		public enum LogType { Info, Debug, Network, Database, Warning, Error, Exception, Assert }
+
+
 		static List<Log> logs = new List<Log>();
 		static List<string> commandHistory = new List<string>();
 		static int commandHistoryIndex = -1;
@@ -25,7 +26,7 @@ namespace NatesJauntyTools
 		public TMP_InputField commandField;
 
 		[Header("Key Binding")]
-		public List<KeyCode> keyBinding = new List<KeyCode>();
+		public List<KeyBinding> keyBindings = new List<KeyBinding>();
 
 		[Header("Log Settings")]
 		[SerializeField] Toggle logTimestampNone;
@@ -33,25 +34,30 @@ namespace NatesJauntyTools
 		[SerializeField] Toggle logTimestampRealTime;
 		[SerializeField] Toggle logTimestampDateTime;
 		[SerializeField] Toggle logTimestampDateTimeZone;
-		public ConsoleTimestampMode CurrentTimestampMode
+		public Console.TimestampMode CurrentTimestampMode
 		{
 			get
 			{
-				if (logTimestampNone.isOn) return ConsoleTimestampMode.None;
-				else if (logTimestampRunTime.isOn) return ConsoleTimestampMode.RunTime;
-				else if (logTimestampRealTime.isOn) return ConsoleTimestampMode.RealTime;
-				else if (logTimestampDateTime.isOn) return ConsoleTimestampMode.DateTime;
-				else if (logTimestampDateTimeZone.isOn) return ConsoleTimestampMode.DateTimeZone;
-				else return ConsoleTimestampMode.RunTime;
+				if (logTimestampNone.isOn) return Console.TimestampMode.None;
+				else if (logTimestampRunTime.isOn) return Console.TimestampMode.RunTime;
+				else if (logTimestampRealTime.isOn) return Console.TimestampMode.RealTime;
+				else if (logTimestampDateTime.isOn) return Console.TimestampMode.DateTime;
+				else if (logTimestampDateTimeZone.isOn) return Console.TimestampMode.DateTimeZone;
+				else return Console.TimestampMode.RunTime;
 			}
 		}
+
+		[SerializeField] GameObject logFilterPrefab;
+		[SerializeField] Transform logFilterParent;
+		[SerializeField] List<LogType> includedLogTypes = new List<LogType>();
+
 		[SerializeField] Toggle includeInfoLogs;
 		[SerializeField] Toggle includeDebugLogs;
 		[SerializeField] Toggle includeNetworkLogs;
 		[SerializeField] Toggle includeDatabaseLogs;
-		[SerializeField] Toggle includeAssertLogs;
 		[SerializeField] Toggle includeWarningLogs;
 		[SerializeField] Toggle includeErrorLogs;
+		[SerializeField] Toggle includeAssertLogs;
 		[SerializeField] Toggle includeExceptionLogs;
 
 
@@ -62,11 +68,13 @@ namespace NatesJauntyTools
 			CloseWindow();
 			logsText.text = "";
 			CreateCommands();
+
+			PopulateLogFilters();
 		}
 
 		void Update()
 		{
-			if (KeyBindingTriggered()) { if (window.activeSelf) { CloseWindow(); } else { OpenWindow(); } }
+			if (AnyKeyBindingTriggered()) { ToggleWindow(); }
 			NavigateCommandHistory();
 		}
 
@@ -85,20 +93,16 @@ namespace NatesJauntyTools
 
 		#region Setup & Maintenance
 
-		bool KeyBindingTriggered()
+		bool AnyKeyBindingTriggered()
 		{
-			bool atLeastOneBindingWasDownThisFrame = false;
+			bool atLeastOneBindingWasTriggered = false;
 
-			foreach (KeyCode keyCode in keyBinding)
+			foreach (var binding in keyBindings)
 			{
-				if (Input.GetKey(keyCode))
-				{
-					if (Input.GetKeyDown(keyCode)) { atLeastOneBindingWasDownThisFrame = true; }
-				}
-				else return false;
+				if (binding.TriggeredThisFrame()) atLeastOneBindingWasTriggered = true;
 			}
 
-			return atLeastOneBindingWasDownThisFrame;
+			return atLeastOneBindingWasTriggered;
 		}
 
 		void NavigateCommandHistory()
@@ -141,6 +145,12 @@ namespace NatesJauntyTools
 			window.SetActive(false);
 		}
 
+		void ToggleWindow()
+		{
+			if (window.activeSelf) CloseWindow();
+			else OpenWindow();
+		}
+
 		void ResetCommandField()
 		{
 			commandField.text = "";
@@ -149,13 +159,34 @@ namespace NatesJauntyTools
 			commandHistoryIndex = -1;
 		}
 
-		IEnumerator ForceScrollDown()
+		IEnumerator ForceScrollToBottom()
 		{
 			// Wait for end of frame AND force update all canvases before setting to bottom.
 			yield return new WaitForEndOfFrame();
 			Canvas.ForceUpdateCanvases();
 			scrollRect.verticalNormalizedPosition = 0f;
 			Canvas.ForceUpdateCanvases();
+		}
+
+		void PopulateLogFilters()
+		{
+			includedLogTypes = Tools.GetEnumValues<LogType>();
+
+			foreach (LogType logType in includedLogTypes)
+			{
+				ConsoleLogFilter newFilter = Instantiate(logFilterPrefab, logFilterParent).GetComponent<ConsoleLogFilter>();
+				newFilter.SetData(logType);
+				newFilter.OnValueChanged.AddListener((bool value) => AdjustLogFilter(newFilter.logType, value));
+			}
+
+
+			void AdjustLogFilter(LogType logType, bool included)
+			{
+				if (included) includedLogTypes.Add(logType);
+				else includedLogTypes.Remove(logType);
+
+				RefreshLogDisplay();
+			}
 		}
 
 		#endregion
@@ -191,15 +222,14 @@ namespace NatesJauntyTools
 		}
 
 		// Make sure this is called on the End Edit of the command field
-		public void RunCommand()
+		public void RunCommand(string commandText)
 		{
 			if (Input.GetKeyDown(KeyCode.Return))
 			{
-				string fullLine = commandField.text;
 				ResetCommandField();
-				if (System.String.IsNullOrEmpty(fullLine)) { return; }
+				if (System.String.IsNullOrEmpty(commandText)) { return; }
 
-				List<string> userArgs = fullLine.ToLower().Split(' ').ToList();
+				List<string> userArgs = commandText.ToLower().Split(' ').ToList();
 				string userCommand = userArgs[0];
 				userArgs.RemoveAt(0);
 
@@ -215,9 +245,9 @@ namespace NatesJauntyTools
 
 				if (!commandFound) { Debug.LogWarning($"Command \"{userCommand}\" not found"); }
 
-				if (commandHistory.Contains(fullLine)) { commandHistory.RemoveAll(s => String.Equals(s, fullLine)); }
-				commandHistory.Insert(0, fullLine);
-				StartCoroutine(ForceScrollDown());
+				if (commandHistory.Contains(commandText)) { commandHistory.RemoveAll(s => String.Equals(s, commandText)); }
+				commandHistory.Insert(0, commandText);
+				StartCoroutine(ForceScrollToBottom());
 			}
 		}
 
@@ -233,28 +263,28 @@ namespace NatesJauntyTools
 
 		#region Logging
 
-		public static void Log(string message, ConsoleLogType type = ConsoleLogType.Info)
+		public static void Log(string message, Console.LogType type = Console.LogType.Info)
 		{
 			logs.Add(new Log(message, type));
-			_.StartCoroutine(_.ForceScrollDown());
+			_.StartCoroutine(_.ForceScrollToBottom());
 			_.RefreshLogDisplay();
 		}
 
-		void OnLogReceived(string message, string stackTrace, LogType unityLogType)
+		void OnLogReceived(string message, string stackTrace, UnityEngine.LogType unityLogType)
 		{
-			ConsoleLogType logTypeToPass;
-			switch (unityLogType)
+			Console.LogType consoleLogType = unityLogType switch
 			{
-				case LogType.Log: logTypeToPass = ConsoleLogType.Info; break;
-				case LogType.Assert: logTypeToPass = ConsoleLogType.Assert; break;
-				case LogType.Warning: logTypeToPass = ConsoleLogType.Warning; break;
-				case LogType.Error: logTypeToPass = ConsoleLogType.Error; break;
-				case LogType.Exception: logTypeToPass = ConsoleLogType.Exception; break;
-				default: logTypeToPass = ConsoleLogType.Info; break;
-			}
+				UnityEngine.LogType.Log => Console.LogType.Info,
+				UnityEngine.LogType.Assert => Console.LogType.Assert,
+				UnityEngine.LogType.Warning => Console.LogType.Warning,
+				UnityEngine.LogType.Error => Console.LogType.Error,
+				UnityEngine.LogType.Exception => Console.LogType.Exception,
 
-			logs.Add(new Log(message, logTypeToPass));
-			StartCoroutine(ForceScrollDown());
+				_ => Console.LogType.Info
+			};
+
+			logs.Add(new Log(message, consoleLogType));
+			StartCoroutine(ForceScrollToBottom());
 			RefreshLogDisplay();
 		}
 
@@ -263,18 +293,20 @@ namespace NatesJauntyTools
 			string totalOutput = "";
 			foreach (Log log in logs)
 			{
-				switch (log.type)
-				{
-					case ConsoleLogType.Info: if (!includeInfoLogs.isOn) continue; else break;
-					case ConsoleLogType.Debug: if (!includeDebugLogs.isOn) continue; else break;
-					case ConsoleLogType.Network: if (!includeNetworkLogs.isOn) continue; else break;
-					case ConsoleLogType.Database: if (!includeDatabaseLogs.isOn) continue; else break;
-					case ConsoleLogType.Assert: if (!includeAssertLogs.isOn) continue; else break;
-					case ConsoleLogType.Warning: if (!includeWarningLogs.isOn) continue; else break;
-					case ConsoleLogType.Error: if (!includeErrorLogs.isOn) continue; else break;
-					case ConsoleLogType.Exception: if (!includeExceptionLogs.isOn) continue; else break;
-					default: continue;
-				}
+				if (!includedLogTypes.Contains(log.type)) continue; // Skip this log
+
+				// switch (log.type)
+				// {
+				// 	case Console.LogType.Info: if (!includeInfoLogs.isOn) continue; else break;
+				// 	case Console.LogType.Debug: if (!includeDebugLogs.isOn) continue; else break;
+				// 	case Console.LogType.Network: if (!includeNetworkLogs.isOn) continue; else break;
+				// 	case Console.LogType.Database: if (!includeDatabaseLogs.isOn) continue; else break;
+				// 	case Console.LogType.Assert: if (!includeAssertLogs.isOn) continue; else break;
+				// 	case Console.LogType.Warning: if (!includeWarningLogs.isOn) continue; else break;
+				// 	case Console.LogType.Error: if (!includeErrorLogs.isOn) continue; else break;
+				// 	case Console.LogType.Exception: if (!includeExceptionLogs.isOn) continue; else break;
+				// 	default: continue;
+				// }
 
 				totalOutput += "\n" + log.GetText(CurrentTimestampMode);
 			}
@@ -331,9 +363,9 @@ namespace NatesJauntyTools
 		public float runTimestamp;
 		public DateTimeOffset realTimestamp;
 		public string message;
-		public ConsoleLogType type;
+		public Console.LogType type;
 
-		public Log(string message, ConsoleLogType type)
+		public Log(string message, Console.LogType type)
 		{
 			runTimestamp = Time.time;
 			realTimestamp = DateTimeOffset.Now;
@@ -347,48 +379,75 @@ namespace NatesJauntyTools
 			{
 				switch (type)
 				{
-					case ConsoleLogType.Info: return "#777";
-					case ConsoleLogType.Debug: return "#FFF";
-					case ConsoleLogType.Network: return "#0AF";
-					case ConsoleLogType.Database: return "#93B";
-					case ConsoleLogType.Assert: return "#F70";
-					case ConsoleLogType.Warning: return "#EB0";
-					case ConsoleLogType.Error: return "#F00";
-					case ConsoleLogType.Exception: return "#A00";
+					case Console.LogType.Info: return "#777";
+					case Console.LogType.Debug: return "#FFF";
+					case Console.LogType.Network: return "#0AF";
+					case Console.LogType.Database: return "#93B";
+					case Console.LogType.Assert: return "#F70";
+					case Console.LogType.Warning: return "#EB0";
+					case Console.LogType.Error: return "#F00";
+					case Console.LogType.Exception: return "#A00";
 					default: return "#F0D";
 				}
 			}
 		}
 
-		public string GetText(ConsoleTimestampMode timestampMode)
+		public string GetText(Console.TimestampMode timestampMode)
 		{
 			List<string> timestampOutput = new List<string>();
 
 			switch (timestampMode)
 			{
-				case ConsoleTimestampMode.None: return $"<color={ColorCode}>{message}</color>";
-				case ConsoleTimestampMode.RunTime: return $"<color={ColorCode}>[{runTimestamp.ToString("F3")}] {message}</color>";
+				case Console.TimestampMode.None: return $"<color={ColorCode}>{message}</color>";
+				case Console.TimestampMode.RunTime: return $"<color={ColorCode}>[{runTimestamp.ToString("F3")}] {message}</color>";
 				default: return $"<color={ColorCode}>[{GetRealTimestampOutput(timestampMode)}] {message}</color>";
 			}
 		}
 
-		public string GetRealTimestampOutput(ConsoleTimestampMode timestampMode)
+		public string GetRealTimestampOutput(Console.TimestampMode timestampMode)
 		{
 			List<string> timestampOutput = new List<string>();
 
-			if (timestampMode == ConsoleTimestampMode.DateTime || timestampMode == ConsoleTimestampMode.DateTimeZone)
+			if (timestampMode == Console.TimestampMode.DateTime || timestampMode == Console.TimestampMode.DateTimeZone)
 			{
 				timestampOutput.Add(realTimestamp.DateTime.ToString("yyyy/MM/dd"));
 			}
 
 			timestampOutput.Add(realTimestamp.DateTime.ToString("HH:mm:ss") + "." + realTimestamp.DateTime.Millisecond.ToString("D3"));
 
-			if (timestampMode == ConsoleTimestampMode.DateTimeZone)
+			if (timestampMode == Console.TimestampMode.DateTimeZone)
 			{
 				timestampOutput.Add("TZ" + realTimestamp.Offset.TotalHours.ToString("F1"));
 			}
 
 			return String.Join(" ", timestampOutput);
+		}
+	}
+
+	[Serializable]
+	public struct KeyBinding
+	{
+		public List<KeyCode> keys;
+
+		public KeyBinding(List<KeyCode> keys)
+		{
+			this.keys = keys;
+		}
+
+		public bool TriggeredThisFrame()
+		{
+			bool atLeastOneBindingWasDownThisFrame = false;
+
+			foreach (KeyCode keyCode in keys)
+			{
+				if (Input.GetKey(keyCode))
+				{
+					if (Input.GetKeyDown(keyCode)) { atLeastOneBindingWasDownThisFrame = true; }
+				}
+				else return false;
+			}
+
+			return atLeastOneBindingWasDownThisFrame;
 		}
 	}
 }

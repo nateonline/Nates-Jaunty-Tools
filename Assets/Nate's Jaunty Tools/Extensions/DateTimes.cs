@@ -54,5 +54,44 @@ namespace NatesJauntyTools
 			TimeSpan diff = date.ToUniversalTime() - unixOrigin;
 			return Math.Floor(diff.TotalSeconds);
 		}
+
+		public static string FriendlyNowComparison(this DateTime target)
+		{
+			DateTime now = DateTime.Now;
+			TimeSpan difference;
+			bool isPastTarget;
+			string valueString;
+
+			if (target < now)
+			{
+				difference = now - target;
+				isPastTarget = true;
+			}
+			else
+			{
+				difference = target - now;
+				isPastTarget = false;
+			}
+
+			if (difference.Days >= 2)
+			{
+				valueString = $"{(int)difference.Days} days";
+			}
+			else if (difference.TotalHours >= 2)
+			{
+				valueString = $"{(int)difference.TotalHours} hours";
+			}
+			else if (difference.TotalMinutes >= 2)
+			{
+				valueString = $"{(int)difference.TotalMinutes} minutes";
+			}
+			else if (difference.TotalSeconds >= 2)
+			{
+				valueString = $"{(int)difference.TotalSeconds} seconds";
+			}
+			else return "now";
+
+			return (isPastTarget) ? $"{valueString} ago" : $"{valueString} from now";
+		}
 	}
 }

@@ -29,16 +29,6 @@ namespace NatesJauntyTools.Details
 				},
 				new AttributionItem()
 				{
-					name = "Google Sheets Logo",
-					description = "",
-					sourceURL = "https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg",
-					authorName = "Google",
-					authorURL = "https://www.google.com/sheets/about/",
-					licenseName = "None",
-					licenseURL = "https://commons.wikimedia.org/wiki/File:Google_Sheets_logo_(2014-2020).svg"
-				},
-				new AttributionItem()
-				{
 					name = "Font Awesome Icons",
 					description = "Original and modified icons from the free tier of Font Awesome",
 					sourceURL = "https://fontawesome.com/",

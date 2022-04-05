@@ -2,29 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NatesJauntyTools;
+using NatesJauntyTools.GoogleSheets;
 
-public class Tester : MonoBehaviour
+public class Tester : Script
 {
-	// Start is called before the first frame update
-	void Start()
-	{
-		Console.Log("Info", ConsoleLogType.Info);
-		Console.Log("Debug", ConsoleLogType.Debug);
-		Console.Log("Network", ConsoleLogType.Network);
-		Console.Log("Database", ConsoleLogType.Database);
-		Console.Log("Assert", ConsoleLogType.Assert);
-		Console.Log("Warning", ConsoleLogType.Warning);
-		Console.Log("Error", ConsoleLogType.Error);
-		Console.Log("Exception", ConsoleLogType.Exception);
+	[SerializeField] GoogleSheetLink googleSheetLink;
 
-		Debug.Log("Debug.Log");
-		Debug.LogWarning("Debug.LogWarning");
-		Debug.LogError("Debug.LogError");
+	[InspectorButton]
+	public void GetA1()
+	{
+		Debug.Log(googleSheetLink.GetCell("'Sheet1'!A1").ToString());
 	}
 
-	// Update is called once per frame
-	void Update()
+	[InspectorButton]
+	public void LogEnums()
 	{
-
+		foreach (var logType in Tools.GetEnumValues<Console.LogType>())
+		{
+			Debug.Log(logType);
+		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4;
@@ -9,60 +10,47 @@ using Google.Apis.Sheets.v4.Data;
 
 namespace NatesJauntyTools.GoogleSheets
 {
-	[CreateAssetMenu(menuName = "Nate's Jaunty Tools/Google Sheets/Google Sheet Link", fileName = "New Google Sheet Link")]
+	[CreateAssetMenu(menuName = "Nate's Jaunty Tools/Google Integrations/Google Sheet Link", fileName = "New Google Sheet Link")]
 	public class GoogleSheetLink : ScriptableObject
 	{
 		#region Global Variables
 
-		string[] Scopes = { SheetsService.Scope.Spreadsheets };
+		readonly string[] scopes = { SheetsService.Scope.Spreadsheets };
+
 		SheetsService service;
 		public bool IsInitialized => service != null;
 
-		[Tooltip("Copied from the URL bar when viewing the google sheet (in between the '/d/' and '/edit')")]
+		[Tooltip("False = Initialize when used for the first time\nTrue = Initialize on ScriptableObject Awake()")]
+		[SerializeField] bool initializeOnAwake;
+
+		[Tooltip("Copied from the URL bar when viewing the Google Sheet (in between the '/d/' and '/edit')")]
 		[SerializeField] string spreadsheetID = "";
 
-		[Tooltip("The name of the json asset. Includes .json and must be in the StreamingAssets folder")]
-		[SerializeField] string secretsPath = "client_secrets.json";
+		[Tooltip("Copied from the client_secrets.json file generated from your service account")]
+		[SerializeField, TextArea] string clientSecretsJSON;
 
 		#endregion
 
 
 		#region Setup
 
-		public void Initialize()
+		void Awake() { if (initializeOnAwake) VerifyService(); }
+
+		void VerifyService()
 		{
-			GoogleCredential credential = null;
-			string streamedPath = $"{Application.streamingAssetsPath}/{secretsPath}";
-			try
+			if (!IsInitialized)
 			{
-				using (var stream = new FileStream(streamedPath, FileMode.Open, FileAccess.Read))
+				service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
 				{
-					credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+					HttpClientInitializer = GoogleCredential.FromJson(clientSecretsJSON).CreateScoped(scopes),
+					ApplicationName = name,
+				});
+
+				if (!IsInitialized) // Still isn't initialized?
+				{
+					throw new Exception($"{name} initialization failed: Service wasn't created correctly");
 				}
 			}
-			catch (Exception e)
-			{
-				Debug.LogWarning($"{name} initialization failed: [{e.Message}] when using secrets.json path [{streamedPath}]");
-				return;
-			}
-
-			service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
-			{
-				HttpClientInitializer = credential,
-				ApplicationName = name,
-			});
-
-			if (service == null) { Debug.LogWarning($"{name} initialization failed: Service wasn't created correctly"); }
-		}
-
-		bool IsInitializedForOperation(string operationName)
-		{
-			if (service == null)
-			{
-				Debug.LogWarning($"{name} can't perform {operationName} operation because it isn't initialized!");
-				return false;
-			}
-			else return true;
 		}
 
 		#endregion
@@ -70,40 +58,40 @@ namespace NatesJauntyTools.GoogleSheets
 
 		#region Data Functions
 
+		/// <param name="range"> In "'MySheet'!A1" format </param>
 		public object GetCell(string range)
 		{
+			VerifyService();
+
 			if (range.Contains(":"))
 			{
-				Debug.LogWarning($"Can't get cell with {range}, use GetRange instead");
-				return null;
+				throw new ArgumentException($"Can't use GetCell with \"{range}\", use GetRange instead");
 			}
-			else
+
+			try
 			{
 				var request = service.Spreadsheets.Values.Get(spreadsheetID, range);
-
 				var response = request.Execute();
 				var values = response.Values;
-
-				if (values == null || values.Count == 0)
-				{
-					return null;
-				}
-				else if (values.Count > 1)
-				{
-					Debug.LogWarning($"Can't get multiple values with GetCell, use GetRange instead");
-					return null;
-				}
-				else return values[0][0];
+				return (values != null && values.Count > 0) ? values[0][0] : null;
+			}
+			catch
+			{
+				throw new Exception($"Error reading range \"{range}\"! Check to make sure the range is spelled correctly");
 			}
 		}
 
+		/// <param name="range"> In "'MySheet'!A1" format </param>
 		public void SetCell(string range, object value)
 		{
+			VerifyService();
+
 			if (range.Contains(":"))
 			{
-				Debug.LogWarning($"Can't get cell with {range}, use GetRange instead");
+				throw new ArgumentException($"Can't use SetCell with \"{range}\", use SetRange instead");
 			}
-			else
+
+			try
 			{
 				var valueRange = new ValueRange();
 				valueRange.Values = new List<IList<object>> { new List<object>() { value } };
@@ -113,56 +101,77 @@ namespace NatesJauntyTools.GoogleSheets
 
 				var response = request.Execute();
 			}
-		}
-
-		public IList<IList<object>> GetRange(string range)
-		{
-			if (IsInitializedForOperation("GetRange"))
+			catch
 			{
-				var request = service.Spreadsheets.Values.Get(spreadsheetID, range);
-
-				try
-				{
-					var response = request.Execute();
-					var values = response.Values;
-					if (values != null && values.Count > 0) { return values; }
-				}
-				catch
-				{
-					Debug.LogWarning($"Error reading range {range} - Check to make sure the range is spelled correctly.");
-				}
+				throw new Exception($"Error reading range \"{range}\"! Check to make sure the range is spelled correctly");
 			}
-
-			return null;
 		}
 
-		public System.Threading.Tasks.Task AppendRow(string range, List<object> values)
+		/// <param name="range"> In "'MySheet'!A1:B2" format </param>
+		public List<List<object>> GetRange(string range)
 		{
-			return System.Threading.Tasks.Task.Factory.StartNew(() =>
+			VerifyService();
+
+			var request = service.Spreadsheets.Values.Get(spreadsheetID, range);
+
+			try
 			{
-				if (IsInitializedForOperation("AppendRow"))
-				{
-					var valueRange = new ValueRange();
-					valueRange.Values = new List<IList<object>> { values };
-
-					var request = service.Spreadsheets.Values.Append(valueRange, spreadsheetID, range);
-					request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-
-					var appendResponse = request.Execute();
-				}
-			});
+				var response = request.Execute();
+				var values = response.Values;
+				return (values != null && values.Count > 0) ? values as List<List<object>> : null;
+			}
+			catch
+			{
+				throw new Exception($"Error reading range \"{range}\"! Check to make sure the range is spelled correctly");
+			}
 		}
 
-		#endregion
-
-
-		#region Helper Functions
-
-		public static string RowA1Notation(List<object> rowData)
+		/// <param name="range"> In "'MySheet'!A1:B2" format </param>
+		public void SetRange(string range, List<List<object>> values)
 		{
-			char start = 'A';
-			char end = (char)((rowData.Count - 1) + 'A');
-			return $"{start}:{end}";
+			VerifyService();
+
+			try
+			{
+				var valueRange = new ValueRange();
+				valueRange.Values = values as IList<IList<object>>;
+
+				var request = service.Spreadsheets.Values.Update(valueRange, spreadsheetID, range);
+				request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+
+				var response = request.Execute();
+			}
+			catch
+			{
+				throw new Exception($"Error reading range \"{range}\"! Check to make sure the range is spelled correctly");
+			}
+		}
+
+		/// <param name="range"> Only the sheet name and column letters are required (ex: 'MySheet'!A:F) </param>
+		public void AppendRow(string range, List<object> values)
+		{
+			VerifyService();
+
+			try
+			{
+				var valueRange = new ValueRange();
+				valueRange.Values = new List<IList<object>> { values };
+
+				var request = service.Spreadsheets.Values.Append(valueRange, spreadsheetID, range);
+				request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+
+				var appendResponse = request.Execute();
+			}
+			catch
+			{
+				throw new Exception($"Error reading range \"{range}\"! Check to make sure the range is spelled correctly");
+			}
+		}
+
+		/// <param name="range"> Only the sheet name and column letters are required (ex: 'MySheet'!A:F) </param>
+		public Task AppendRowAsync(string range, List<object> values)
+		{
+			return Task.Factory.StartNew(() => AppendRow(range, values));
 		}
 
 		#endregion
