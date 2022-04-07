@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3385f84170669244699a6982dd7aefb4, type: 3}
   m_Name: Testing Google Sheet Link
   m_EditorClassIdentifier: 
-  initializeOnAwake: 0
   spreadsheetID: 1cWoeO7hKNibNFkAK8ozobOMcZo19YNItBmPq1u7Q2OE
   clientSecretsJSON: "{\r\n  \"type\": \"service_account\",\r\n  \"project_id\":
     \"testproject-8e18e\",\r\n  \"private_key_id\": \"c5ebbc169b796fdf29db69c0aad35979dda2205f\",\r\n 

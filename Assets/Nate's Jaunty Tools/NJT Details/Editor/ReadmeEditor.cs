@@ -78,6 +78,10 @@ namespace NatesJauntyTools.Details
 					style.normal.textColor = "#148CE6".HexToColor();
 					EditorGUILayout.LabelField($"*  {item.description}", style);
 					break;
+				
+				case ChangeType.Spacer:
+					EditorGUILayout.Space(5);
+					break;
 
 				default:
 					break;

@@ -27,7 +27,7 @@ namespace NatesJauntyTools.GoogleSheets
 
 			if (GUILayout.Button("Test Log"))
 			{
-				Debug.Log($"GS Link initialized = {gsLink.IsInitialized}");
+				Debug.Log($"GS Link initialized = {gsLink.IsSetup}");
 				Debug.Log($"SO Type = {soExample.GetType()}");
 				Debug.Log($"Path = {path}");
 			}
