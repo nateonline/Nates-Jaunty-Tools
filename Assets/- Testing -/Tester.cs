@@ -8,12 +8,16 @@ using NatesJauntyTools.GoogleSheets;
 public class Tester : Script
 {
 	[SerializeField] TMP_Text timer;
+	[SerializeField] TMP_Text getCellReturn;
+
 	void Update() => timer.text = Time.time.ToString("n2");
 
 
 	[SerializeField] GoogleSheetLink googleSheetLink;
 	[SerializeField] string getRange, getCell, setRange, setCell, appendRow;
 
+
+	#region Testing Functions
 
 	[InspectorButton]
 	public void GetRange()
@@ -149,10 +153,18 @@ public class Tester : Script
 	}
 
 	[InspectorButton]
+	public async void SetRange_Async()
+	{
+		await googleSheetLink.SetRange_Async(setRange, rows);
+	}
+
+	[InspectorButton]
 	public void SetCell()
 	{
 		googleSheetLink.SetCell(setCell, "asdf");
 	}
+
+	#endregion
 }
 
 public class TestRow : GoogleSheetRow

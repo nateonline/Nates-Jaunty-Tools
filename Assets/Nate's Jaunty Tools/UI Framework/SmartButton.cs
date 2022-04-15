@@ -8,9 +8,19 @@ using NatesJauntyTools;
 [ExecuteAlways]
 public class SmartButton : Script
 {
+	string textAtLoad;
+
+
 #if UNITY_EDITOR
 	[Tooltip("(Editor ONLY) If true, the label will always match the name of the GameObject")]
 	[SerializeField] bool alwaysLabelNameInEditor;
+
+	void Awake()
+	{
+		if (alwaysLabelNameInEditor) { Text = name; }
+		textAtLoad = Text;
+	}
+
 	void Update()
 	{
 		if (alwaysLabelNameInEditor && !Application.isPlaying && Text != name) Text = name;
@@ -34,4 +44,6 @@ public class SmartButton : Script
 	}
 
 	public Button.ButtonClickedEvent OnClick => button.onClick;
+
+	public void RevertText() => Text = textAtLoad;
 }

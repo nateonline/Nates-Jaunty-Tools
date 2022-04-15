@@ -174,10 +174,7 @@ namespace NatesJauntyTools.GoogleSheets
 		/// <param name="range"> Example: 'My Sheet'!A1:B2 </param>
 		public void SetRange<T>(string range, List<T> rows) where T : GoogleSheetRow
 		{
-			List<List<object>> tableValues = new List<List<object>>();
-			foreach (T row in rows) { tableValues.Add(row.Serialize()); }
-			Debug.Log(tableValues.Count);
-			SetRange(range, tableValues);
+			SetRange(range, rows.ToTable());
 		}
 
 		/// <param name="range"> Example: 'My Sheet'!A1:B2 </param>
@@ -188,12 +185,16 @@ namespace NatesJauntyTools.GoogleSheets
 			try
 			{
 				var valueRange = new ValueRange();
-				valueRange.Values = values as IList<IList<object>>;
+				List<IList<object>> tableValues = new List<IList<object>>();
+				foreach (var rowValues in values) { tableValues.Add(rowValues); }
+				valueRange.Values = tableValues;
 
 				var request = service.Spreadsheets.Values.Update(valueRange, spreadsheetID, range);
 				request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
+				Debug.Log(request.Range);
 				var response = await request.ExecuteAsync();
+				Debug.Log(response.UpdatedCells);
 			}
 			catch
 			{
@@ -305,7 +306,12 @@ namespace NatesJauntyTools.GoogleSheets
 		/// <param name="range"> Example: 'My Sheet'!A1 </param>
 		public async void SetCell_Callback(string range, object value, Action callback)
 		{
-			await SetRange_Async(range, ObjectToTable(value));
+			VerifyCellAddress(range);
+
+			Debug.Log($"Value to set: {value}");
+			var table = ObjectToTable(value);
+			Debug.Log($"Value in table: {table[0][0]}");
+			await SetRange_Async(range, table);
 			callback();
 		}
 

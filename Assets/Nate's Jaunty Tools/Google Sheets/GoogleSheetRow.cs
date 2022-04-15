@@ -12,4 +12,14 @@ namespace NatesJauntyTools.GoogleSheets
 
 		public abstract List<object> Serialize();
 	}
+
+	public static class GoogleSheetRowExtensions
+	{
+		public static List<List<object>> ToTable<T>(this List<T> listOfRows) where T : GoogleSheetRow
+		{
+			List<List<object>> tableValues = new List<List<object>>();
+			foreach (T row in listOfRows) { tableValues.Add(row.Serialize()); }
+			return tableValues;
+		}
+	}
 }
