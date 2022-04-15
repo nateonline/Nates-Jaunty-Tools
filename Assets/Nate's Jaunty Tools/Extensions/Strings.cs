@@ -159,5 +159,12 @@ namespace NatesJauntyTools
 				default: throw new NotImplementedException($"CharacterSet {characterSet} doesn't have a defined set of characters!");
 			}
 		}
+
+
+		public static string SubstringAfterLast(this string value, string search)
+		{
+			int pos = value.LastIndexOf(search) + 1;
+			return value.Substring(pos, value.Length - pos);
+		}
 	}
 }
