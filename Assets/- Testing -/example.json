@@ -1,0 +1,28 @@
+{
+	"name": "projects/testproject-8e18e/databases/(default)/documents/testData/data1",
+	"fields": {
+		"intField": {
+			"integerValue": "123"
+		},
+		"floatField": {
+			"doubleValue": 123.4567
+		},
+		"stringField": {
+			"stringValue": "asdf"
+		},
+		"message": {
+			"stringValue": "Hello There"
+		},
+		"nullField": {
+			"nullValue": null
+		},
+		"timestampField": {
+			"timestampValue": "2022-04-15T06:00:00Z"
+		},
+		"boolField": {
+			"booleanValue": true
+		}
+	},
+	"createTime": "2022-04-15T18:24:48.721413Z",
+	"updateTime": "2022-04-16T22:39:05.716161Z"
+}

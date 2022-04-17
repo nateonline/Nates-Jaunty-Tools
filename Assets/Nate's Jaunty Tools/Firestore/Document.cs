@@ -9,13 +9,15 @@ using NatesJauntyTools;
 
 namespace NatesJauntyTools.Firestore
 {
-	[JsonConverter(typeof(Converter<Document>))]
+	[JsonConverter(typeof(Converter<Document>)), Serializable]
 	public class Document
 	{
 		public string Path { get; private set; }
 		public string ID => Path.SubstringAfterLast("/");
 		public DateTime CreatedTimestamp { get; private set; }
 		public DateTime UpdatedTimestamp { get; private set; }
+
+		public string JSON => JsonConvert.SerializeObject(this);
 
 		public void InitializeFromJson(JToken id, JToken created, JToken updated)
 		{
@@ -37,9 +39,9 @@ namespace NatesJauntyTools.Firestore
 
 				JObject jsonFields = (JObject)json["fields"];
 
-				foreach (var newDocField in typeof(T).GetFields())
+				foreach (var docField in typeof(T).GetFields())
 				{
-					switch (newDocField.Name)
+					switch (docField.Name)
 					{
 						case nameof(newDoc.Path):
 						case nameof(newDoc.ID):
@@ -49,9 +51,9 @@ namespace NatesJauntyTools.Firestore
 							break;
 
 						default: // All other fields
-							object newValue = GetValue((JObject)jsonFields[newDocField.Name]);
-							Debug.Log($"Setting {typeof(T)}.{newDocField.Name} to {newValue}");
-							newDocField.SetValue(newDoc, newValue);
+							object newValue = GetValue((JObject)jsonFields[docField.Name]);
+							Debug.Log($"Setting {typeof(T)}.{docField.Name} to {newValue}");
+							docField.SetValue(newDoc, newValue);
 							break;
 					}
 
@@ -72,18 +74,63 @@ namespace NatesJauntyTools.Firestore
 						// Debug.Log($"Looking at json field {fieldObject["stringValue"]}");
 						// Debug.Log($"Detected json field as a {fieldType}");
 
-						// return jsonFields[newDocField.Name].ToObject(fieldType);
+						// return jsonFields[docToCreateField.Name].ToObject(fieldType);
 					}
 				}
 
 				return newDoc;
 			}
 
-			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+			public override void WriteJson(JsonWriter writer, object data, JsonSerializer serializer)
 			{
+				T docData = (T)data;
+				writer.WriteStartObject();
+				writer.WritePropertyName("fields");
+				writer.WriteStartObject();
 
+				foreach (var docField in typeof(T).GetFields())
+				{
+					writer.WritePropertyName(docField.Name);
+					serializer.Serialize(writer, docField.GetValue(docData));
+					// if (typeof(T).IsEquivalentTo(typeof(string)))
+					// {
+					// 	writer.WriteStartObject();
+					// 	writer.WritePropertyName("stringValue");
+					// 	serializer.Serialize(writer, docField.GetValue(docData));
+					// 	writer.WriteEndObject();
+					// }
+					// else if (typeof(T).IsEquivalentTo(typeof(bool)))
+					// {
+					// 	writer.WriteStartObject();
+					// 	writer.WritePropertyName("booleanValue");
+					// 	serializer.Serialize(writer, docField.GetValue(docData));
+					// 	writer.WriteEndObject();
+					// }
+					// else if (typeof(T).IsEquivalentTo(typeof(int)))
+					// {
+					// 	writer.WriteStartObject();
+					// 	writer.WritePropertyName("integerValue");
+					// 	serializer.Serialize(writer, docField.GetValue(docData));
+					// 	writer.WriteEndObject();
+					// }
+					// else if (typeof(T).IsEquivalentTo(typeof(double)))
+					// {
+					// 	writer.WriteStartObject();
+					// 	writer.WritePropertyName("doubleValue");
+					// 	serializer.Serialize(writer, docField.GetValue(docData));
+					// 	writer.WriteEndObject();
+					// }
+					// else if (typeof(T).IsEquivalentTo(typeof(DateTime)))
+					// {
+					// 	writer.WriteStartObject();
+					// 	writer.WritePropertyName("timestampValue");
+					// 	serializer.Serialize(writer, docField.GetValue(docData));
+					// 	writer.WriteEndObject();
+					// }
+				}
 
-				throw new NotImplementedException();
+				writer.WriteEndObject();
+				writer.WriteEndObject();
 			}
 		}
 
@@ -91,117 +138,6 @@ namespace NatesJauntyTools.Firestore
 		/**
 		public class BuildSerializer : JsonConverter
 		{
-			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-			{
-				JObject json = JObject.Load(reader);
-				Build newBuild = new Build();
-
-				Build.SpecFields.ForEach((Action<FieldInfo>)(sf =>
-				{
-					JToken jsonValue = json[sf.Name];
-					Spec<object> newSpec = (Spec<object>)sf.GetValue(newBuild);
-					if (jsonValue == null) { sf.SetValue(newBuild, jsonValue); }
-					else
-					{
-						switch (newSpec.displayName)
-						{
-							case DisplayNames.SKU:
-							case DisplayNames.TITLE:
-								newSpec.Value = jsonValue.ToString();
-								break;
-
-							case DisplayNames.QUANTITY:
-								newSpec.Value = jsonValue.ToObject<int?>();
-								break;
-
-							case DisplayNames.CATEGORY:
-								newSpec.Value = jsonValue.ToObject<Category>();
-								break;
-
-							case DisplayNames.PRODUCT_TYPES:
-								newSpec.Value = JsonConvert.DeserializeObject<List<ProductType>>(jsonValue.ToString());
-								break;
-
-							case DisplayNames.SHAPE_CODE:
-								newSpec.Value = jsonValue.ToObject<ShapeCode>();
-								break;
-
-							case DisplayNames.FEET:
-							case DisplayNames.DRAIN_HOLES:
-								newSpec.Value = jsonValue.ToObject<bool>();
-								break;
-
-							case DisplayNames.FINISH:
-								newSpec.Value = App.Data.Finishes.FirstOrDefault(f => f.id.value.ToString() == jsonValue.ToString());
-								break;
-
-							case DisplayNames.BURNER:
-								newSpec.Value = App.Data.Burners.FirstOrDefault(b => b.id.value.ToString() == jsonValue.ToString());
-								break;
-
-							case DisplayNames.FUEL_TYPE:
-								newSpec.Value = App.Data.FuelTypes.FirstOrDefault(ft => ft.id.value.ToString() == jsonValue.ToString());
-								break;
-
-							case DisplayNames.FILL:
-								newSpec.Value = App.Data.Fills.FirstOrDefault(f => f.id.value.ToString() == jsonValue.ToString());
-								break;
-
-							case DisplayNames.PANEL:
-								newSpec.Value = App.Data.Panels.FirstOrDefault(p => p.id.value.ToString() == jsonValue.ToString());
-								break;
-
-							case DisplayNames.MATERIAL:
-								newSpec.Value = jsonValue.ToObject<BuildMaterial>();
-								break;
-
-							case DisplayNames.THICKNESS:
-								newSpec.Value = jsonValue.ToObject<ThicknessEnum>();
-								break;
-
-							case DisplayNames.BOWL_SIZE:
-							case DisplayNames.ORB_SIZE:
-							case DisplayNames.VASE_SIZE:
-							case DisplayNames.BULB_SIZE:
-							case DisplayNames.FIRE_BASIN_SIZE:
-							case DisplayNames.FIRE_BOWL_SIZE:
-							case DisplayNames.FIRE_DISH_SIZE:
-							case DisplayNames.FIRE_ROUND_SIZE:
-							case DisplayNames.WATER_BOWL_SIZE:
-							case DisplayNames.DISH_SIZE:
-								newSpec.Value = jsonValue.ToObject<BowlSizeEnum>();
-								break;
-
-							case DisplayNames.ADD_ON_OPTIONS:
-								List<AddOnOption> selectedAddOnOptions = new List<AddOnOption>();
-								jsonValue.ToArray().ToList().ForEach(jsonADO =>
-								{
-									AddOnOption newADO = App.Data.AddOnOptions.FirstOrDefault(ado => ado.id == jsonADO["id"].ToString());
-									newADO.quantity.value = jsonADO["quantity"].ToObject<double>();
-									newADO.purchasePrice.value = jsonADO["purchasePrice"].ToObject<double>();
-									newADO.costing = JsonConvert.DeserializeObject<Costing>(jsonADO["costing"].ToString());
-									selectedAddOnOptions.Add(newADO);
-								});
-								newSpec.Value = selectedAddOnOptions;
-								break;
-
-							default:
-								newSpec.Value = jsonValue.ToObject<double?>();
-								break;
-						}
-						newSpec.ParentBuild = newBuild;
-						sf.SetValue(newBuild, newSpec);
-					}
-				}));
-
-				newBuild.costing = JsonConvert.DeserializeObject<Costing>(json["costing"].ToString());
-
-				SKUTemplate matchingSKUTemplate = App.Data.SKULibrary.FirstOrDefault(t => t.ShapeCode == newBuild.ShapeCode);
-				newBuild.readOnlySpecs.AddRange(matchingSKUTemplate.allowModification ? matchingSKUTemplate.ReadOnlySpecs : Constants.NO_MOD_SPECS);
-
-				return newBuild;
-			}
-			
 			public override void WriteJson(JsonWriter writer, object data, JsonSerializer serializer)
 			{
 				Build build = (Build)data;
@@ -336,6 +272,117 @@ namespace NatesJauntyTools.Firestore
 					});
 					writer.WriteEndObject();
 				}
+			}
+			
+			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+			{
+				JObject json = JObject.Load(reader);
+				Build newBuild = new Build();
+
+				Build.SpecFields.ForEach((Action<FieldInfo>)(sf =>
+				{
+					JToken jsonValue = json[sf.Name];
+					Spec<object> newSpec = (Spec<object>)sf.GetValue(newBuild);
+					if (jsonValue == null) { sf.SetValue(newBuild, jsonValue); }
+					else
+					{
+						switch (newSpec.displayName)
+						{
+							case DisplayNames.SKU:
+							case DisplayNames.TITLE:
+								newSpec.Value = jsonValue.ToString();
+								break;
+
+							case DisplayNames.QUANTITY:
+								newSpec.Value = jsonValue.ToObject<int?>();
+								break;
+
+							case DisplayNames.CATEGORY:
+								newSpec.Value = jsonValue.ToObject<Category>();
+								break;
+
+							case DisplayNames.PRODUCT_TYPES:
+								newSpec.Value = JsonConvert.DeserializeObject<List<ProductType>>(jsonValue.ToString());
+								break;
+
+							case DisplayNames.SHAPE_CODE:
+								newSpec.Value = jsonValue.ToObject<ShapeCode>();
+								break;
+
+							case DisplayNames.FEET:
+							case DisplayNames.DRAIN_HOLES:
+								newSpec.Value = jsonValue.ToObject<bool>();
+								break;
+
+							case DisplayNames.FINISH:
+								newSpec.Value = App.Data.Finishes.FirstOrDefault(f => f.id.value.ToString() == jsonValue.ToString());
+								break;
+
+							case DisplayNames.BURNER:
+								newSpec.Value = App.Data.Burners.FirstOrDefault(b => b.id.value.ToString() == jsonValue.ToString());
+								break;
+
+							case DisplayNames.FUEL_TYPE:
+								newSpec.Value = App.Data.FuelTypes.FirstOrDefault(ft => ft.id.value.ToString() == jsonValue.ToString());
+								break;
+
+							case DisplayNames.FILL:
+								newSpec.Value = App.Data.Fills.FirstOrDefault(f => f.id.value.ToString() == jsonValue.ToString());
+								break;
+
+							case DisplayNames.PANEL:
+								newSpec.Value = App.Data.Panels.FirstOrDefault(p => p.id.value.ToString() == jsonValue.ToString());
+								break;
+
+							case DisplayNames.MATERIAL:
+								newSpec.Value = jsonValue.ToObject<BuildMaterial>();
+								break;
+
+							case DisplayNames.THICKNESS:
+								newSpec.Value = jsonValue.ToObject<ThicknessEnum>();
+								break;
+
+							case DisplayNames.BOWL_SIZE:
+							case DisplayNames.ORB_SIZE:
+							case DisplayNames.VASE_SIZE:
+							case DisplayNames.BULB_SIZE:
+							case DisplayNames.FIRE_BASIN_SIZE:
+							case DisplayNames.FIRE_BOWL_SIZE:
+							case DisplayNames.FIRE_DISH_SIZE:
+							case DisplayNames.FIRE_ROUND_SIZE:
+							case DisplayNames.WATER_BOWL_SIZE:
+							case DisplayNames.DISH_SIZE:
+								newSpec.Value = jsonValue.ToObject<BowlSizeEnum>();
+								break;
+
+							case DisplayNames.ADD_ON_OPTIONS:
+								List<AddOnOption> selectedAddOnOptions = new List<AddOnOption>();
+								jsonValue.ToArray().ToList().ForEach(jsonADO =>
+								{
+									AddOnOption newADO = App.Data.AddOnOptions.FirstOrDefault(ado => ado.id == jsonADO["id"].ToString());
+									newADO.quantity.value = jsonADO["quantity"].ToObject<double>();
+									newADO.purchasePrice.value = jsonADO["purchasePrice"].ToObject<double>();
+									newADO.costing = JsonConvert.DeserializeObject<Costing>(jsonADO["costing"].ToString());
+									selectedAddOnOptions.Add(newADO);
+								});
+								newSpec.Value = selectedAddOnOptions;
+								break;
+
+							default:
+								newSpec.Value = jsonValue.ToObject<double?>();
+								break;
+						}
+						newSpec.ParentBuild = newBuild;
+						sf.SetValue(newBuild, newSpec);
+					}
+				}));
+
+				newBuild.costing = JsonConvert.DeserializeObject<Costing>(json["costing"].ToString());
+
+				SKUTemplate matchingSKUTemplate = App.Data.SKULibrary.FirstOrDefault(t => t.ShapeCode == newBuild.ShapeCode);
+				newBuild.readOnlySpecs.AddRange(matchingSKUTemplate.allowModification ? matchingSKUTemplate.ReadOnlySpecs : Constants.NO_MOD_SPECS);
+
+				return newBuild;
 			}
 
 			public override bool CanConvert(Type objectType)

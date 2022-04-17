@@ -11,6 +11,7 @@ public class Tester : Script
 {
 	public FirestoreLink firestore;
 	public string path;
+	public TestDocument testDocument;
 
 	[InspectorButton]
 	public async void GetTestData()
@@ -18,8 +19,27 @@ public class Tester : Script
 		string json = await firestore.GetRawData(path);
 		Debug.Log(json);
 
-		var testDoc = JsonConvert.DeserializeObject<TestDocument>(json);
-		Debug.Log(testDoc.ID);
-		Debug.Log(testDoc.intField);
+		testDocument = JsonConvert.DeserializeObject<TestDocument>(json);
+		Debug.Log(testDocument.ID);
+		Debug.Log(testDocument.ID);
+		Debug.Log(testDocument.intField);
+	}
+
+	[InspectorButton]
+	public void DebugJSON()
+	{
+		Debug.Log(JsonConvert.SerializeObject(testDocument));
+	}
+
+	[InspectorButton]
+	public void SetTestData()
+	{
+		firestore.SetData(path, testDocument, OnSetData);
+
+
+		void OnSetData(TestDocument updatedDocument)
+		{
+			Debug.Log(updatedDocument.JSON);
+		}
 	}
 }
