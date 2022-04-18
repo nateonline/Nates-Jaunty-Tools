@@ -9,18 +9,14 @@ using NatesJauntyTools.Firestore;
 
 public class Tester : Script
 {
-	public FirestoreLink firestore;
+	public FirestoreAPI firestore;
 	public string path;
 	public TestDocument testDocument;
 
 	[InspectorButton]
 	public async void GetTestData()
 	{
-		string json = await firestore.GetRawData(path);
-		Debug.Log(json);
-
-		testDocument = JsonConvert.DeserializeObject<TestDocument>(json);
-		Debug.Log(testDocument.ID);
+		testDocument = await firestore.GetDocumentAsync<TestDocument>(path);
 		Debug.Log(testDocument.ID);
 		Debug.Log(testDocument.intField);
 	}
@@ -34,7 +30,7 @@ public class Tester : Script
 	[InspectorButton]
 	public void SetTestData()
 	{
-		firestore.SetData(path, testDocument, OnSetData);
+		firestore.SetDocument(path, testDocument, OnSetData);
 
 
 		void OnSetData(TestDocument updatedDocument)

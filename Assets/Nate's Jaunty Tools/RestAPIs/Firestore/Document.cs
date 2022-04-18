@@ -19,14 +19,12 @@ namespace NatesJauntyTools.Firestore
 
 		public string JSON => JsonConvert.SerializeObject(this);
 
+
 		public void InitializeFromJson(JToken id, JToken created, JToken updated)
 		{
-			Path = $"/{id.ToString()}";
+			Path = id.ToString();
 			CreatedTimestamp = DateTime.Parse(created.ToString());
 			UpdatedTimestamp = DateTime.Parse(updated.ToString());
 		}
-
-
-
 	}
 }

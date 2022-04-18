@@ -50,12 +50,6 @@ namespace NatesJauntyTools.Firestore
 					if (fieldObject["timestampValue"] != null) { value = fieldObject["timestampValue"].ToObject(typeof(DateTime)); }
 
 					return value;
-
-					// Debug.Log($"Looking at json field {fieldObject}");
-					// Debug.Log($"Looking at json field {fieldObject["stringValue"]}");
-					// Debug.Log($"Detected json field as a {fieldType}");
-
-					// return jsonFields[docToCreateField.Name].ToObject(fieldType);
 				}
 			}
 
@@ -66,9 +60,12 @@ namespace NatesJauntyTools.Firestore
 		{
 			T docData = (T)data;
 			writer.WriteStartObject();
-			writer.WritePropertyName("fields");
-			writer.WriteStartObject();
 
+			writer.WritePropertyName("name");
+			serializer.Serialize(writer, docData.Path);
+
+			writer.WritePropertyName("fields"); // Start of fields
+			writer.WriteStartObject();
 			foreach (var docField in typeof(T).GetFields())
 			{
 				writer.WritePropertyName(docField.Name);
@@ -112,8 +109,8 @@ namespace NatesJauntyTools.Firestore
 					serializer.Serialize(writer, null);
 				}
 			}
+			writer.WriteEndObject(); // End of fields
 
-			writer.WriteEndObject();
 			writer.WriteEndObject();
 		}
 	}

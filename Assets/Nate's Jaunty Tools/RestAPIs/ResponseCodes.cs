@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using NatesJauntyTools;
 
-namespace NatesJauntyTools.REST
+namespace NatesJauntyTools.RestAPIs
 {
 	public enum ResponseCode
 	{
@@ -93,29 +93,20 @@ namespace NatesJauntyTools.REST
 
 	public static class ResponseCodeExtensions
 	{
-		public static string Name(this long code)
-		{
-			return ((ResponseCode)code).Name();
-		}
+		public static string Name(this long code) => ((ResponseCode)code).Name();
 
-		public static string Name(this ResponseCode code)
-		{
-			return Tools.SplitCamelCase(code.ToString());
-		}
+		public static string Name(this ResponseCode code) => Tools.SplitCamelCase(code.ToString());
 
-		public static bool IsSuccess(this ResponseCode responseCode)
-		{
-			return (200 <= (int)responseCode && (int)responseCode <= 299);
-		}
+		public static string FullName(this long code) => ((ResponseCode)code).FullName();
 
-		public static ResponseCode ToResponseEnum(this long code)
-		{
-			return (ResponseCode)code;
-		}
+		public static string FullName(this ResponseCode code) => $"{(int)code}-{Tools.SplitCamelCase(code.ToString())}";
 
-		public static ResponseCode ResponseCodeEnum(this UnityWebRequest request)
-		{
-			return request.responseCode.ToResponseEnum();
-		}
+		public static bool IsSuccess(this ResponseCode responseCode) => (200 <= (int)responseCode && (int)responseCode <= 299);
+
+		public static ResponseCode ToResponseEnum(this long code) => (ResponseCode)code;
+
+		public static ResponseCode ResponseCodeEnum(this UnityWebRequest request) => request.responseCode.ToResponseEnum();
+
+		public static bool IsSuccess(this UnityWebRequest request) => request.ResponseCodeEnum().IsSuccess();
 	}
 }
