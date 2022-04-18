@@ -6,6 +6,6 @@ using NatesJauntyTools.Firestore;
 [Newtonsoft.Json.JsonConverter(typeof(DocumentConverter<TestDocument>)), System.Serializable]
 public class TestDocument : Document
 {
+	public string username;
 	public string message;
-	public int intField;
 }

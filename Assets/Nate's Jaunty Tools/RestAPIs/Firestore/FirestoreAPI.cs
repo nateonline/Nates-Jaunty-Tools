@@ -16,9 +16,12 @@ namespace NatesJauntyTools.Firestore
 	[CreateAssetMenu(menuName = "Nate's Jaunty Tools/Firestore/Firestore API")]
 	public class FirestoreAPI : RestAPI
 	{
-		public string projectID;
+		[SerializeField] string projectID;
 
 		string BaseURL => $"https://firestore.googleapis.com/v1/projects/{projectID}/databases/(default)/documents/";
+
+		Dictionary<string, string> Headers => new Dictionary<string, string>()
+		{ };
 
 
 		public async void GetDocument<T>(string path, Action<T> callback) where T : Document
@@ -28,7 +31,7 @@ namespace NatesJauntyTools.Firestore
 
 		public async Task<T> GetDocumentAsync<T>(string path) where T : Document
 		{
-			return await Get<T>(BaseURL + path);
+			return await Get<T>(BaseURL + path, Headers);
 		}
 
 		public async void SetDocument<T>(string path, T document, Action<T> callback = null) where T : Document

@@ -11,31 +11,40 @@ public class Tester : Script
 {
 	public FirestoreAPI firestore;
 	public string path;
-	public TestDocument testDocument;
+	public Status status;
+	public TextField username;
+	public TextField message;
+
 
 	[InspectorButton]
-	public async void GetTestData()
+	public void GetData()
 	{
-		testDocument = await firestore.GetDocumentAsync<TestDocument>(path);
-		Debug.Log(testDocument.ID);
-		Debug.Log(testDocument.intField);
+		status.Set("Getting data...");
+		firestore.GetDocument<TestDocument>(path, OnGetData);
+
+
+		void OnGetData(TestDocument updatedDocument)
+		{
+			username.Value = updatedDocument.username;
+			message.Value = updatedDocument.message;
+			status.Clear();
+		}
 	}
 
 	[InspectorButton]
-	public void DebugJSON()
+	public void SetData()
 	{
-		Debug.Log(JsonConvert.SerializeObject(testDocument));
-	}
+		TestDocument newDoc = new TestDocument();
+		newDoc.username = username.Value;
+		newDoc.message = message.Value;
 
-	[InspectorButton]
-	public void SetTestData()
-	{
-		firestore.SetDocument(path, testDocument, OnSetData);
+		status.Set("Setting data...");
+		firestore.SetDocument(path, newDoc, OnSetData);
 
 
 		void OnSetData(TestDocument updatedDocument)
 		{
-			Debug.Log(updatedDocument.JSON);
+			status.Clear();
 		}
 	}
 }
