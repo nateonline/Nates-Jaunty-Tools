@@ -10,8 +10,10 @@ using NatesJauntyTools.RestAPIs;
 
 namespace NatesJauntyTools.Firestore
 {
+	// API KEY = AIzaSyBczzeyjR6iXU09s6SHwS7VxxVNx84Luuo
 	// https://firebase.google.com/docs/firestore/use-rest-api
-	// https://firebase.google.com/docs/firestore/reference/rest/v1/projects.databases.documents
+	// Use Google Identity OAuth 2.0 and service account
+
 
 	[CreateAssetMenu(menuName = "Nate's Jaunty Tools/Firestore/Firestore API")]
 	public class FirestoreAPI : RestAPI
