@@ -166,5 +166,15 @@ namespace NatesJauntyTools
 			int pos = value.LastIndexOf(search) + 1;
 			return value.Substring(pos, value.Length - pos);
 		}
+
+
+		public static string SubstringBetween(this string value, string firstString, string lastString)
+		{
+			string finalString;
+			int pos1 = value.IndexOf(firstString) + firstString.Length;
+			int pos2 = value.IndexOf(lastString);
+			finalString = value.Substring(pos1, pos2 - pos1);
+			return finalString;
+		}
 	}
 }

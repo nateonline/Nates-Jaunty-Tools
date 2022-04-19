@@ -213,12 +213,17 @@ namespace NatesJauntyTools
 				Mathf.Pow(color.g, 2) * 0.587f +
 				Mathf.Pow(color.b, 2) * 0.114f);
 
-		public static Color32 PreferredTextColor(this Color32 backgroundColor, float midpoint = 0.5f)
+		public static Color PreferredTextColor(this Color backgroundColor, float midpoint = 0.3f)
+		{
+			return PreferredTextColor((Color32)backgroundColor, midpoint);
+		}
+
+		public static Color32 PreferredTextColor(this Color32 backgroundColor, float midpoint = 0.3f)
 		{
 			return backgroundColor.PreferredTextColor(Color.white, Color.black, midpoint);
 		}
 
-		public static Color32 PreferredTextColor(this Color32 backgroundColor, Color32 lightTextColor, Color32 darkTextColor, float midpoint = 0.5f)
+		public static Color32 PreferredTextColor(this Color32 backgroundColor, Color32 lightTextColor, Color32 darkTextColor, float midpoint = 0.3f)
 		{
 			float luminosity = Mathf.Sqrt(
 				Mathf.Pow(backgroundColor.r, 2) * 0.299f +

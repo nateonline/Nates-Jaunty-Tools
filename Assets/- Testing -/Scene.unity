@@ -1781,6 +1781,8 @@ MonoBehaviour:
   status: {fileID: 1785602530}
   username: {fileID: 1569895183}
   message: {fileID: 322243450}
+  riotAPI: {fileID: 11400000, guid: afbe6e902903faa40b30eca6a78a65b2, type: 2}
+  summonerName: an Online User
 --- !u!4 &2078098107
 Transform:
   m_ObjectHideFlags: 0

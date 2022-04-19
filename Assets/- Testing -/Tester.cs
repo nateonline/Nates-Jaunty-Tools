@@ -5,46 +5,23 @@ using UnityEngine.Networking;
 using TMPro;
 using Newtonsoft.Json;
 using NatesJauntyTools;
-using NatesJauntyTools.Firestore;
+using NatesJauntyTools.Firebase;
+using NatesJauntyTools.RiotGames;
 
 public class Tester : Script
 {
+	[Header("Firebase")]
 	public FirestoreAPI firestore;
 	public string path;
-	public Status status;
-	public TextField username;
-	public TextField message;
 
-
-	[InspectorButton]
-	public void GetData()
+	[InspectorButton(true)]
+	public async void TestDeserializeCollection()
 	{
-		status.Set("Getting data...");
-		firestore.GetDocument<TestDocument>(path, OnGetData);
+		string json = "{\"documents\":[{\"name\":\"projects/office-status-320718/databases/(default)/documents/data/nate\",\"fields\":{\"location\":{\"stringValue\":\"IT Office\"},\"description\":{\"stringValue\":\"\"},\"customColor\":{\"stringValue\":\"\"},\"name\":{\"stringValue\":\"Nate\"},\"message\":{\"stringValue\":\"Come In!\"}},\"createTime\":\"2022-04-19T20:59:13.427804Z\",\"updateTime\":\"2022-04-19T21:04:44.726569Z\"}]}";
 
+		string modifiedJson = "[{\"name\":\"projects/office-status-320718/databases/(default)/documents/data/nate\",\"fields\":{\"location\":{\"stringValue\":\"IT Office\"},\"description\":{\"stringValue\":\"\"},\"customColor\":{\"stringValue\":\"\"},\"name\":{\"stringValue\":\"Nate\"},\"message\":{\"stringValue\":\"Come In!\"}},\"createTime\":\"2022-04-19T20:59:13.427804Z\",\"updateTime\":\"2022-04-19T21:04:44.726569Z\"}]";
 
-		void OnGetData(TestDocument updatedDocument)
-		{
-			username.Value = updatedDocument.username;
-			message.Value = updatedDocument.message;
-			status.Clear();
-		}
-	}
-
-	[InspectorButton]
-	public void SetData()
-	{
-		TestDocument newDoc = new TestDocument();
-		newDoc.username = username.Value;
-		newDoc.message = message.Value;
-
-		status.Set("Setting data...");
-		firestore.SetDocument(path, newDoc, OnSetData);
-
-
-		void OnSetData(TestDocument updatedDocument)
-		{
-			status.Clear();
-		}
+		List<TestDocument> testCollection = await firestore.GetCollectionAsync<TestDocument>("data");
+		Debug.Log(testCollection.Count);
 	}
 }

@@ -49,7 +49,17 @@ namespace NatesJauntyTools.RestAPIs
 
 		#region Requests
 
-		public async Task<T> Get<T>(string url, Dictionary<string, string> headers = null)
+		protected async Task<string> GetRaw(string url, Dictionary<string, string> headers = null)
+		{
+			UnityWebRequest request = UnityWebRequest.Get(url);
+			PopulateHeaders(request, headers);
+
+			await TrackAndSendRequest(request);
+
+			return request.downloadHandler.text;
+		}
+
+		protected async Task<T> Get<T>(string url, Dictionary<string, string> headers = null)
 		{
 			UnityWebRequest request = UnityWebRequest.Get(url);
 			PopulateHeaders(request, headers);
@@ -59,7 +69,7 @@ namespace NatesJauntyTools.RestAPIs
 			return ValidateResponseObject<T>(request);
 		}
 
-		public async Task<T> Post<T>(string url, T data, Dictionary<string, string> headers = null)
+		protected async Task<T> Post<T>(string url, T data, Dictionary<string, string> headers = null)
 		{
 			UnityWebRequest request = UnityWebRequest.Post(url, JsonConvert.SerializeObject(data));
 			PopulateHeaders(request, headers);
@@ -69,7 +79,7 @@ namespace NatesJauntyTools.RestAPIs
 			return ValidateResponseObject<T>(request);
 		}
 
-		public async Task<T> Patch<T>(string url, T data, Dictionary<string, string> headers = null)
+		protected async Task<T> Patch<T>(string url, T data, Dictionary<string, string> headers = null)
 		{
 			UnityWebRequest request = UnityWebRequest.Put(url, JsonConvert.SerializeObject(data));
 			request.method = "PATCH";
