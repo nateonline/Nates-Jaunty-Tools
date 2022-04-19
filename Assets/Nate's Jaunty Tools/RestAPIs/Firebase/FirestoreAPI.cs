@@ -54,9 +54,9 @@ namespace NatesJauntyTools.Firebase
 		public async Task<List<T>> GetCollectionAsync<T>(string path) where T : Document
 		{
 			string json = await GetRaw($"https://firestore.googleapis.com/v1/projects/{projectID}/databases/(default)/documents/data");
-			string prefix = "{\"documents\":";
-			string modifiedJson = json.Replace(prefix, "").TrimEnd('}');
 			Debug.Log(json);
+			int trim = 17; // Removes "documents" prefix
+			string modifiedJson = json.Substring(trim, json.Length - (trim + 3)); // Removes last line and last "}"
 			Debug.Log(modifiedJson);
 
 			return JsonConvert.DeserializeObject<List<T>>(modifiedJson);
