@@ -56,7 +56,16 @@ namespace NatesJauntyTools.RestAPIs
 
 			await TrackAndSendRequest(request);
 
-			return request.downloadHandler.text;
+			ResponseCode responseCode = request.ResponseCodeEnum();
+			if (responseCode.IsSuccess())
+			{
+				return request.downloadHandler.text;
+			}
+			else
+			{
+				LogRestError(request);
+				return null;
+			}
 		}
 
 		protected async Task<T> Get<T>(string url, Dictionary<string, string> headers = null)
