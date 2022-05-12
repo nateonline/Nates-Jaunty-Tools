@@ -26,18 +26,13 @@ namespace NatesJauntyTools.Details
 
 		public void ApplyData()
 		{
-			versionNumber = "2022.04.07";
+			versionNumber = "2022.05.12";
 			unityVersion = "2020.3.10f1";
 
 			changeLog = new List<ChangeLogItem>()
 			{
-				new ChangeLogItem(ChangeType.Added, "Added Crash Handler functionality to Console"),
-				new ChangeLogItem(ChangeType.Modified, "Made Console's log filters dynamic"),
-				new ChangeLogItem(ChangeType.Modified, "Made Console's layout a little more mobile friendly"),
-				new ChangeLogItem(ChangeType.Spacer),
-				new ChangeLogItem(ChangeType.Added, "Added smart button (with option to label name)"),
-				new ChangeLogItem(ChangeType.Spacer),
-				new ChangeLogItem(ChangeType.Modified, "Changed GoogleSheetsLink to not need external initialization"),
+				new ChangeLogItem(ChangeType.Modified, "Fixed naming of Subscriber.Unubscribe() missing the \"s\" after \"Un\""),
+				new ChangeLogItem(ChangeType.Added, "Added SubscriberManager for easy subscriber handling in new projects"),
 			};
 		}
 	}
